@@ -2,10 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ocultar elementos con AlpineJS */
 [x-cloak] {
     display: none;
 }
 
+/* =========================================================
+   🎨 SISTEMA DE TEMAS — COMPATIBLE CON TAILWIND 3
+   ========================================================= */
 
+/* ------------------------------
+   TEMA CLARO — por defecto
+--------------------------------*/
+:root {
+    --background: #f3f4f6;
+    --foreground: #111827;
 
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
 
+    --secondary: #1e3a8a;
+    --secondary-foreground: #ffffff;
+
+    --accent: #fbbf24;
+    --accent-foreground: #1e1e1e;
+
+    --muted: #e5e7eb;
+    --muted-foreground: #6b7280;
+
+    --card: #ffffff;
+    --card-foreground: #111827;
+
+    --border: #d1d5db;
+    --input: #d1d5db;
+    --ring: #2563eb;
+}
+
+/* ------------------------------
+   🌙 TEMA OSCURO
+--------------------------------*/
+.dark {
+    --background: #0f172a;
+    --foreground: #e2e8f0;
+
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+
+    --secondary: #1e40af;
+    --secondary-foreground: #ffffff;
+
+    --accent: #facc15;
+    --accent-foreground: #1e1e1e;
+
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+
+    --card: #1e293b;
+    --card-foreground: #f1f5f9;
+
+    --border: #334155;
+    --input: #334155;
+    --ring: #3b82f6;
+}
+
+/* ------------------------------
+   🚓 TEMA POLICÍA VIAL
+--------------------------------*/
+.theme-police {
+    --background: #0a0f25;
+    --foreground: #e8ecff;
+
+    --primary: #1e3a8a;
+    --primary-foreground: #ffffff;
+
+    --secondary: #0c295e;
+    --secondary-foreground: #ffffff;
+
+    --accent: #facc15;
+    --accent-foreground: #1e1e1e;
+
+    --muted: #111827;
+    --muted-foreground: #9ca3af;
+
+    --card: #0d1127;
+    --card-foreground: #e8ecff;
+
+    --border: #1e293b;
+    --input: #1e293b;
+    --ring: var(--accent);
+}
+
+/* ---------------------------------------------------------
+   APLICACIÓN GLOBAL A TODO EL BODY
+--------------------------------------------------------- */
+@layer base {
+    body {
+        background-color: var(--background);
+        color: var(--foreground);
+        transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .card {
+        background-color: var(--card);
+        color: var(--card-foreground);
+    }
+
+    input, select, textarea {
+        background-color: var(--card);
+        border-color: var(--input);
+        color: var(--foreground);
+    }
+}

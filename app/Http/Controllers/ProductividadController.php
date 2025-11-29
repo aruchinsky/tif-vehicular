@@ -9,19 +9,15 @@ use Illuminate\Support\Facades\DB;
 class ProductividadController extends Controller
 {
     /**
-     * Muestra el panel de gráficos de productividad.
+     * 📌 Panel general con gráfico + tabla paginada
      */
     public function index()
     {
-        // 1. Obtener los datos brutos de productividad (necesario para la tabla).
-        // Ordenamos por fecha descendente para que los más recientes salgan primero.
         $productividades = Productividad::with('personalControl')
                                       ->orderBy('fecha', 'desc')
-                                      ->paginate(10); // <-- Usar paginate()
-        
-        // 2. Consulta de datos AGRUPADOS para los gráficos:
-        // Agrupa los datos por FECHA para obtener los totales diarios del sistema,
-        // Y por PERSONAL DE CONTROL para ver la actividad individual.
+                                      ->paginate(10);
+
+        // Datos agrupados para el gráfico
         $chartData = Productividad::select(
             'fecha',
             DB::raw('SUM(total_conductor) as total_conductores'),
@@ -32,21 +28,28 @@ class ProductividadController extends Controller
         ->orderBy('fecha', 'asc')
         ->get();
 
-        // 3. Preparar los datos para Chart.js (o similar)
-        $fechas = $chartData->pluck('fecha')->map(fn($date) => \Carbon\Carbon::parse($date)->format('d/m'));
-        $conductores = $chartData->pluck('total_conductores');
-        $vehiculos = $chartData->pluck('total_vehiculos');
-        $acompanantes = $chartData->pluck('total_acompanantes');
+        // Formatear fechas para el eje X
+        $fechas = $chartData->pluck('fecha')->map(
+            fn($date) => \Carbon\Carbon::parse($date)->format('d/m')
+        );
 
-
-        return view('modules.Productividad.index', compact(
-            'productividades', 
-            'fechas', 
-            'conductores', 
-            'vehiculos', 
-            'acompanantes'
-        ));
+        return view('modules.Productividad.index', [
+            'productividades' => $productividades,
+            'fechas'          => $fechas,
+            'conductores'     => $chartData->pluck('total_conductores'),
+            'vehiculos'       => $chartData->pluck('total_vehiculos'),
+            'acompanantes'    => $chartData->pluck('total_acompanantes'),
+        ]);
     }
-    
-    // Eliminamos los métodos create, store, edit, update, show, destroy.
+
+    /**
+     * 📌 Mostrar registro individual de productividad
+     */
+    public function show($id)
+    {
+        // Buscar el registro con su relación
+        $productividad = Productividad::with('personalControl')->findOrFail($id);
+
+        return view('modules.Productividad.show', compact('productividad'));
+    }
 }

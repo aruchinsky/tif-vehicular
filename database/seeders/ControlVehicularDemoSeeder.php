@@ -145,7 +145,7 @@ class ControlVehicularDemoSeeder extends Seeder
                     'personal_control_id' => $personal->random()->id,
                 ]);
 
-                // Una novedad aleatoria como demo
+                // Novedad aleatoria
                 if ($faker->boolean(50)) {
                     Novedad::create([
                         'vehiculo_id' => $vehiculo->id,
@@ -159,20 +159,45 @@ class ControlVehicularDemoSeeder extends Seeder
             }
 
             // ============================================================
-            // 6️⃣ PRODUCTIVIDAD
+            // 6️⃣ PRODUCTIVIDAD (OPTIMIZADA PARA EL GRÁFICO)
             // ============================================================
 
-            foreach ($personal as $p) {
+            $daysBack = 15; // 15 días de historial
+
+            for ($i = $daysBack; $i >= 0; $i--) {
+
+                $fecha = now()->subDays($i)->format('Y-m-d');
+                $p = $personal->random();
+
                 Productividad::create([
                     'personal_control_id' => $p->id,
-                    'fecha' => now()->format('Y-m-d'),
-                    'total_conductor' => rand(3, 10),
-                    'total_vehiculos' => rand(3, 10),
-                    'total_acompanante' => rand(1, 5),
+                    'fecha' => $fecha,
+                    'total_conductor' => rand(5, 20),
+                    'total_vehiculos' => rand(5, 15),
+                    'total_acompanante' => rand(3, 12),
                 ]);
             }
 
-            $this->command->info('🚓 Sistema Control Vehicular poblado correctamente.');
+            // Registros extra por personal
+            foreach ($personal as $p) {
+
+                $extraRecords = rand(2, 4);
+
+                for ($k = 0; $k < $extraRecords; $k++) {
+
+                    $fechaRandom = now()->subDays(rand(0, $daysBack))->format('Y-m-d');
+
+                    Productividad::create([
+                        'personal_control_id' => $p->id,
+                        'fecha' => $fechaRandom,
+                        'total_conductor' => rand(2, 15),
+                        'total_vehiculos' => rand(2, 10),
+                        'total_acompanante' => rand(1, 8),
+                    ]);
+                }
+            }
+
+            $this->command->info('🚓 Sistema Control Vehicular poblado correctamente con productividad optimizada.');
         });
     }
 }

@@ -1,75 +1,84 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
-            {{ __('Detalle del Conductor') }}
+        <h2 class="text-xl font-bold" style="color: var(--foreground)">
+            Detalle del Conductor
         </h2>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
-                
-                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
-                    Información del Conductor
-                </h3>
+    <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div class="card shadow-lg border rounded-xl p-6">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 dark:text-gray-300">
+            <h3 class="text-lg font-semibold mb-6" style="color: var(--foreground)">
+                Información del Conductor
+            </h3>
 
-                    <div>
-                        <span class="font-bold">ID:</span>
-                        <p>{{ $conductor->id }}</p>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <div>
-                        <span class="font-bold">Nombre y Apellido:</span>
-                        <p>{{ $conductor->nombre_apellido ?? '—' }}</p>
-                    </div>
-
-                    <div>
-                        <span class="font-bold">DNI:</span>
-                        <p>{{ $conductor->dni_conductor ?? '—' }}</p>
-                    </div>
-
-                    <div>
-                        <span class="font-bold">Domicilio:</span>
-                        <p>{{ $conductor->domicilio ?? '—' }}</p>
-                    </div>
-
-                    <div>
-                        <span class="font-bold">Categoría de Carnet:</span>
-                        <p>{{ $conductor->categoria_carnet ?? '—' }}</p>
-                    </div>
-
-                    <div>
-                        <span class="font-bold">Tipo de Conductor:</span>
-                        <p>{{ $conductor->tipo_conductor ?? '—' }}</p>
-                    </div>
-
-                    <div>
-                        <span class="font-bold">Vehículo Asignado:</span>
-                        <p>{{ $conductor->vehiculo->marca_modelo ?? '—' }}</p>
-                    </div>
-
-                    <div>
-                        <span class="font-bold">Destino:</span>
-                        <p>{{ $conductor->destino ?? '—' }}</p>
-                    </div>
-
-
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">ID</p>
+                    <span>{{ $conductor->id }}</span>
                 </div>
 
-                <div class="mt-6 flex gap-3">
-                    <a href="{{ route('conductores.index') }}"
-                       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
-                        Volver
-                    </a>
-
-                    <a href="{{ route('conductores.edit', $conductor->id) }}"
-                       class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md">
-                        Editar
-                    </a>
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Nombre</p>
+                    <span>{{ $conductor->nombre_apellido }}</span>
                 </div>
+
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">DNI</p>
+                    <span>{{ $conductor->dni_conductor }}</span>
+                </div>
+
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Domicilio</p>
+                    <span>{{ $conductor->domicilio ?? '—' }}</span>
+                </div>
+
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Categoría Carnet</p>
+                    <span>{{ $conductor->categoria_carnet ?? '—' }}</span>
+                </div>
+
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Tipo</p>
+                    <span>{{ $conductor->tipo_conductor ?? '—' }}</span>
+                </div>
+
+                {{-- Vehículos asociados --}}
+                <div class="md:col-span-2">
+                    <p class="font-bold" style="color: var(--foreground)">Vehículos Asociados</p>
+                    @if($conductor->vehiculos->count() > 0)
+                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                            @foreach($conductor->vehiculos as $veh)
+                                <li>{{ $veh->marca_modelo }} — {{ $veh->dominio }}</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <span>—</span>
+                    @endif
+                </div>
+
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Destino</p>
+                    <span>{{ $conductor->destino ?? '—' }}</span>
+                </div>
+
             </div>
+
+            <div class="flex justify-end gap-4 mt-8">
+                <a href="{{ route('conductores.index') }}"
+                    class="px-5 py-3 rounded-lg"
+                    style="background: var(--muted); color: var(--muted-foreground)">
+                    Volver
+                </a>
+
+                <a href="{{ route('conductores.edit', $conductor->id) }}"
+                    class="px-5 py-3 rounded-lg"
+                    style="background: var(--accent); color: var(--accent-foreground)">
+                    Editar
+                </a>
+            </div>
+
         </div>
     </div>
 </x-app-layout>

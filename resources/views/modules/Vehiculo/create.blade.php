@@ -1,78 +1,107 @@
 <x-app-layout>
     <x-slot name="header">
-        Crear Nuevo Vehículo
+        <h2 class="text-xl font-bold" style="color: var(--foreground)">
+            Registrar Nuevo Vehículo
+        </h2>
     </x-slot>
 
-    <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+    <div class="max-w-4xl mx-auto p-8 rounded-xl shadow-lg border"
+         style="background: var(--card); border-color: var(--border)">
 
-        <form action="{{ route('vehiculo.store') }}" method="POST" class="space-y-6">
+        {{-- VALIDACIONES --}}
+        @if($errors->any())
+            <div class="mb-6 p-4 rounded-lg border border-red-400 bg-red-100 text-red-700">
+                <strong class="font-semibold">Errores detectados:</strong>
+                <ul class="mt-2 ml-5 list-disc">
+                    @foreach($errors->all() as $e)
+                        <li>{{ $e }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('vehiculo.store') }}" method="POST" class="space-y-8">
             @csrf
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {{-- Personal Control --}}
+                {{-- PERSONAL --}}
                 <div>
-                    <label for="personal_control_id">Personal de Control</label>
-                    <select name="personal_control_id" id="personal_control_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                        <option value="">Seleccione Personal</option>
-                        @foreach($personalControls as $personal)
-                            <option value="{{ $personal->id }}" {{ old('personal_control_id') == $personal->id ? 'selected' : '' }}>
-                                {{ $personal->nombre_apellido }}
+                    <label class="font-semibold" style="color: var(--foreground)">Personal de Control</label>
+                    <select name="personal_control_id"
+                        class="w-full px-4 py-3 rounded-lg border"
+                        style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                        <option value="">Seleccione</option>
+                        @foreach($personalControls as $p)
+                            <option value="{{ $p->id }}" {{ old('personal_control_id') == $p->id ? 'selected' : '' }}>
+                                {{ $p->nombre_apellido }}
                             </option>
                         @endforeach
                     </select>
-                    @error('personal_control_id') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- Conductor --}}
+                {{-- CONDUCTOR --}}
                 <div>
-                    <label for="conductor_id">Conductor</label>
-                    <select name="conductor_id" id="conductor_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                        <option value="">Seleccione Conductor</option>
-                        @foreach($conductores as $conductor)
-                            <option value="{{ $conductor->id }}" {{ old('conductor_id') == $conductor->id ? 'selected' : '' }}>
-                                {{ $conductor->nombre_apellido }}
+                    <label class="font-semibold" style="color: var(--foreground)">Conductor</label>
+                    <select name="conductor_id"
+                        class="w-full px-4 py-3 rounded-lg border"
+                        style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                        <option value="">Seleccione</option>
+                        @foreach($conductores as $c)
+                            <option value="{{ $c->id }}" {{ old('conductor_id') == $c->id ? 'selected' : '' }}>
+                                {{ $c->nombre_apellido }}
                             </option>
                         @endforeach
                     </select>
-                    @error('conductor_id') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- Marca/Modelo --}}
+                {{-- MARCA --}}
                 <div>
-                    <label for="marca_modelo">Marca / Modelo</label>
-                    <input type="text" name="marca_modelo" id="marca_modelo" value="{{ old('marca_modelo') }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    @error('marca_modelo') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    <label class="font-semibold" style="color: var(--foreground)">Marca / Modelo</label>
+                    <input type="text" name="marca_modelo" value="{{ old('marca_modelo') }}"
+                        class="w-full px-4 py-3 rounded-lg border"
+                        style="background: var(--card); border-color: var(--input); color: var(--foreground)">
                 </div>
 
-                {{-- Dominio --}}
+                {{-- DOMINIO --}}
                 <div>
-                    <label for="dominio">Dominio</label>
-                    <input type="text" name="dominio" id="dominio" value="{{ old('dominio') }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    @error('dominio') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    <label class="font-semibold" style="color: var(--foreground)">Dominio</label>
+                    <input type="text" name="dominio" value="{{ old('dominio') }}"
+                        class="w-full px-4 py-3 rounded-lg border"
+                        style="background: var(--card); border-color: var(--input); color: var(--foreground)">
                 </div>
 
-                {{-- Color --}}
+                {{-- COLOR --}}
                 <div>
-                    <label for="color">Color</label>
-                    <input type="text" name="color" id="color" value="{{ old('color') }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    @error('color') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    <label class="font-semibold" style="color: var(--foreground)">Color</label>
+                    <input type="text" name="color" value="{{ old('color') }}"
+                        class="w-full px-4 py-3 rounded-lg border"
+                        style="background: var(--card); border-color: var(--input); color: var(--foreground)">
                 </div>
 
-                {{-- Fecha y Hora Control --}}
+                {{-- FECHA --}}
                 <div>
-                    <label for="fecha_hora_control">Fecha y Hora de Control</label>
-                    <input type="datetime-local" name="fecha_hora_control" id="fecha_hora_control" value="{{ old('fecha_hora_control') }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    @error('fecha_hora_control') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    <label class="font-semibold" style="color: var(--foreground)">Fecha y Hora del Control</label>
+                    <input type="datetime-local" name="fecha_hora_control" value="{{ old('fecha_hora_control') }}"
+                        class="w-full px-4 py-3 rounded-lg border"
+                        style="background: var(--card); border-color: var(--input); color: var(--foreground)">
                 </div>
 
             </div>
 
-            <div class="flex justify-end gap-3 pt-4">
-                <a href="{{ route('vehiculo.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Cancelar</a>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Guardar Vehículo</button>
-            </div>
+            <div class="flex justify-end gap-4">
+                <a href="javascript:window.history.back()"
+                class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    Cancelar
+                </a>
 
+
+                <button
+                    class="px-5 py-3 rounded-lg font-semibold"
+                    style="background: var(--primary); color: var(--primary-foreground)">
+                    Guardar Vehículo
+                </button>
+            </div>
         </form>
     </div>
 </x-app-layout>

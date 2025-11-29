@@ -27,10 +27,10 @@ class AcompanianteController extends Controller
     {
         $data = $request->validate([
             'conductor_id'      => 'required|integer|exists:conductor,id',
-            'Dni_acompañante' => 'required|string|max:20|unique:acompaniante,Dni_acompañante',
-            'Nombre_apellido' => 'required|string|max:255',
-            'Domicilio' => 'nullable|string|max:255',
-            'Tipo_acompañante' => 'nullable|string|max:100',
+            'dni_acompaniante' => 'required|string|max:20|unique:acompaniante,dni_acompaniante',
+            'nombre_apellido' => 'required|string|max:255',
+            'domicilio' => 'nullable|string|max:255',
+            'tipo_acompaniante' => 'nullable|string|max:100',
         ]);
 
         Acompaniante::create($data);
@@ -60,10 +60,10 @@ class AcompanianteController extends Controller
     public function update(Request $request, Acompaniante $acompaniante)
     {
         $data = $request->validate([
-            'Dni_acompañante' => "required|string|max:20|unique:acompaniante,Dni_acompañante,{$acompaniante->id}",
-            'Nombre_apellido' => 'required|string|max:255',
-            'Domicilio' => 'nullable|string|max:255',
-            'Tipo_acompañante' => 'nullable|string|max:100',
+            'dni_acompaniante' => "required|string|max:20|unique:acompaniante,dni_acompaniante,{$acompaniante->id}",
+            'nombre_apellido' => 'required|string|max:255',
+            'domicilio' => 'nullable|string|max:255',
+            'tipo_acompaniante' => 'nullable|string|max:100',
         ]);
 
         $acompaniante->update($data);

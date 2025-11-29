@@ -1,66 +1,99 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2>Gestión de Conductores</h2>
-
-        </div>
-        @include('partials._tabs_navigation')
+        <h2 class="text-xl font-bold" style="color: var(--foreground)">
+            Gestión de Conductores
+        </h2>
     </x-slot>
 
-    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
-        {{-- Mensaje de éxito --}}
+    <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+
         @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <div class="mb-4 p-4 rounded-lg border border-green-400 bg-green-100 text-green-700">
                 {{ session('success') }}
             </div>
         @endif
 
-        {{-- Botón crear --}}
-        <a href="{{ route('conductores.create') }}"
-            class="mb-4 inline-flex px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-            Crear Conductor
-        </a>
+        <div class="flex justify-end mb-4">
+            <a href="{{ route('conductores.create') }}"
+                class="px-5 py-3 rounded-lg font-semibold"
+                style="background: var(--primary); color: var(--primary-foreground)">
+                + Nuevo Conductor
+            </a>
+        </div>
 
-        {{-- Tabla --}}
-        <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">DNI</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre y Apellido</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Domicilio</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría Carnet</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipo Conductor</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Vehículo</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Destino</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    @foreach($conductores as $conductor)
+        <div class="card shadow-lg border rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead style="background: var(--muted)">
                         <tr>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-200">{{ $conductor->id }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $conductor->dni_conductor }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $conductor->nombre_apellido }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $conductor->domicilio ?? '—' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $conductor->categoria_carnet ?? '—' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $conductor->tipo_conductor ?? '—' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $conductor->vehiculo->marca_modelo ?? '—' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $conductor->destino ?? '—' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 flex gap-2">
-                                <a href="{{ route('conductores.show', $conductor->id) }}" class="text-blue-600 hover:text-blue-900">Ver Detalle</a>
-                                <a href="{{ route('conductores.edit', $conductor->id) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
-                                <form action="{{ route('conductores.destroy', $conductor->id) }}" method="POST" onsubmit="return confirm('¿Eliminar este conductor?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
-                                </form>
-                            </td>
+                            @foreach(['ID','DNI','Nombre','Domicilio','Categoría','Tipo','Vehículos','Destino','Acciones'] as $col)
+                                <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider"
+                                    style="color: var(--muted-foreground)">
+                                    {{ $col }}
+                                </th>
+                            @endforeach
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+
+                    <tbody>
+                        @foreach($conductores as $conductor)
+                            <tr class="border-b" style="border-color: var(--border)">
+
+                                <td class="px-6 py-4">{{ $conductor->id }}</td>
+                                <td class="px-6 py-4">{{ $conductor->dni_conductor }}</td>
+                                <td class="px-6 py-4">{{ $conductor->nombre_apellido }}</td>
+                                <td class="px-6 py-4">{{ $conductor->domicilio ?? '—' }}</td>
+                                <td class="px-6 py-4">{{ $conductor->categoria_carnet ?? '—' }}</td>
+                                <td class="px-6 py-4">{{ $conductor->tipo_conductor ?? '—' }}</td>
+
+                                {{-- Listado de vehículos asociados --}}
+                                <td class="px-6 py-4">
+                                    @if($conductor->vehiculos->count() > 0)
+                                        <ul class="space-y-1">
+                                            @foreach($conductor->vehiculos as $veh)
+                                                <li>{{ $veh->marca_modelo }} ({{ $veh->dominio }})</li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+
+                                <td class="px-6 py-4">{{ $conductor->destino ?? '—' }}</td>
+
+                                <td class="px-6 py-4 flex gap-3">
+
+                                    <a href="{{ route('conductores.show', $conductor->id) }}"
+                                        class="hover:opacity-70"
+                                        style="color: var(--primary)">
+                                        Ver
+                                    </a>
+
+                                    <a href="{{ route('conductores.edit', $conductor->id) }}"
+                                        class="hover:opacity-70"
+                                        style="color: var(--accent)">
+                                        Editar
+                                    </a>
+
+                                    <form action="{{ route('conductores.destroy', $conductor->id) }}" method="POST"
+                                        onsubmit="return confirm('¿Eliminar este conductor?')">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit" class="hover:opacity-70"
+                                            style="color: var(--destructive)">
+                                            Eliminar
+                                        </button>
+                                    </form>
+
+                                </td>
+
+                            </tr>
+                        @endforeach
+                    </tbody>
+
+                </table>
+            </div>
         </div>
     </div>
 </x-app-layout>

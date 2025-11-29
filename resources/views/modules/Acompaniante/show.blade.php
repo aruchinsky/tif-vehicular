@@ -1,59 +1,65 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Detalle del Acompañante
+        <h2 class="text-xl font-bold" style="color: var(--foreground)">
+            Información del Acompañante
         </h2>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
-                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Información del Acompañante</h3>
+        <div class="card rounded-xl border shadow-lg p-6">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 dark:text-gray-200">
-                    <div>
-                        <span class="font-bold">DNI:</span>
-                        <p>{{ $acompaniante->Dni_acompañante ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <span class="font-bold">Nombre y Apellido:</span>
-                        <p>{{ $acompaniante->Nombre_apellido ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <span class="font-bold">Domicilio:</span>
-                        <p>{{ $acompaniante->Domicilio ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <span class="font-bold">Tipo:</span>
-                        <p>{{ $acompaniante->Tipo_acompañante ?? '—' }}</p>
-                    </div>
+            <h3 class="text-lg font-semibold mb-6" style="color: var(--foreground)">
+                Datos del Acompañante
+            </h3>
 
-                    {{--ID del Conductor --}}
-                    <div>
-                        <span class="font-bold">ID del Conductor:</span>
-                        <p>{{ $acompaniante->conductor_id ?? '—' }}</p>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    {{--Nombre del Conductor --}}
-                    <div>
-                        <span class="font-bold">Nombre del Conductor:</span>
-                        <p>{{ $acompaniante->conductor->nombre_apellido ?? '—' }}</p>
-                    </div>
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">DNI</p>
+                    <span>{{ $acompaniante->dni_acompaniante ?? '—' }}</span>
                 </div>
 
-                <div class="mt-6 flex gap-3">
-                    <a href="{{ route('acompaniante.index') }}"
-                       class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md">
-                        Volver
-                    </a>
-                    <a href="{{ route('acompaniante.edit', $acompaniante->id) }}"
-                       class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md">
-                        Editar
-                    </a>
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Nombre</p>
+                    <span>{{ $acompaniante->nombre_apellido }}</span>
                 </div>
 
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Domicilio</p>
+                    <span>{{ $acompaniante->domicilio }}</span>
+                </div>
+
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Tipo</p>
+                    <span>{{ $acompaniante->tipo_acompaniante }}</span>
+                </div>
+
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">ID Conductor</p>
+                    <span>{{ $acompaniante->conductor_id }}</span>
+                </div>
+
+                <div>
+                    <p class="font-bold" style="color: var(--foreground)">Conductor</p>
+                    <span>{{ $acompaniante->conductor->nombre_apellido ?? '—' }}</span>
+                </div>
             </div>
+
+            <div class="flex justify-end gap-3 mt-8">
+                <a href="{{ route('acompaniante.index') }}"
+                   class="px-5 py-3 rounded-lg"
+                   style="background: var(--muted); color: var(--muted-foreground)">
+                    Volver
+                </a>
+
+                <a href="{{ route('acompaniante.edit', $acompaniante->id) }}"
+                   class="px-5 py-3 rounded-lg"
+                   style="background: var(--accent); color: var(--accent-foreground)">
+                    Editar
+                </a>
+            </div>
+
         </div>
     </div>
 </x-app-layout>

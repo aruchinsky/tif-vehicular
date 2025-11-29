@@ -4,36 +4,64 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-// use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets; // Si lo necesitas
 
 return Application::configure(basePath: dirname(__DIR__))
     ->registered(function ($app) {
         $app->usePublicPath(base_path('public'));
     })
+
+    // ------------------------------------------------------------------------------
+    // 🔵 RUTEO PRINCIPAL DEL SISTEMA
+    // ------------------------------------------------------------------------------
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
-        // Quita 'channels: __DIR__.'/../routes/channels.php',' de aquí
         health: '/up',
     )
+
+    // ------------------------------------------------------------------------------
+    // 🔴 REGISTRO DE MIDDLEWARES (Laravel 12 reemplaza Kernel.php)
+    // ------------------------------------------------------------------------------
     ->withMiddleware(function (Middleware $middleware) {
+
+        // -------------------------------
+        // Web, API, proxies, CSRF, etc.
+        // -------------------------------
         $middleware
             ->web(append: [
-                // AddLinkHeadersForPreloadedAssets::class, // Si lo tenías
+                // AddLinkHeadersForPreloadedAssets::class,
             ])
-            // Solo si usas Sanctum para algo. Si es puramente JWT, no es estrictamente necesario para broadcast
-            // pero no suele hacer daño si lo mantienes:
             ->statefulApi()
             ->trustProxies('*');
-            // ->validateCsrfTokens();
+
         $middleware->validateCsrfTokens(except: [
             'api/*',
-            // 'broadcasting/auth', // No es necesario si Apache lo envía a Node.js
+        ]);
+        
+
+        // --------------------------------------------------------
+        // 🔥 AQUÍ REGISTRAMOS LOS MIDDLEWARES DE SPATIE (OBLIGATORIO)
+        // --------------------------------------------------------
+        $middleware->alias([
+            'role'       => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         ]);
     })
-    
-    // ¡ESTO ES LO CLAVE! Usamos 'auth:api' (o el nombre de tu guard JWT)
-    ->withBroadcasting(base_path('routes/channels.php'), attributes: ['middleware' => ['api', 'auth:api']]) // <--- ¡CAMBIO AQUÍ!
-    ->withExceptions()
+
+    // ------------------------------------------------------------------------------
+    // 🟣 BROADCASTING (Reverb / Pusher / Websockets)
+    // ------------------------------------------------------------------------------
+    ->withBroadcasting(
+        base_path('routes/channels.php'),
+        attributes: ['middleware' => ['api', 'auth:api']]
+    )
+
+    // ------------------------------------------------------------------------------
+    // ⚪ EXCEPCIONES
+    // ------------------------------------------------------------------------------
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })
+
     ->create();

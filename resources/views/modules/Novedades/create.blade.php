@@ -1,75 +1,101 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between bg-gray-900 text-white px-4 py-2 rounded-md shadow">
-            <h2 class="text-lg font-semibold">Crear Nueva Novedad</h2>
-
-            <nav class="space-x-4">
-                <a href="{{ route('novedades.index') }}" class="hover:underline">Volver al listado</a>
-            </nav>
-        </div>
+        <h2 class="text-xl font-bold" style="color: var(--foreground)">
+            Registrar Nueva Novedad
+        </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
 
-            {{-- Mensaje de error --}}
-            @if ($errors->any())
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                    <ul class="list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg p-6">
-                <form action="{{ route('novedades.store') }}" method="POST">
-                    @csrf
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                        <div>
-                            <label class="font-bold text-gray-700 dark:text-gray-200">Vehículo:</label>
-                            <select name="vehiculo_id" class="w-full border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-200">
-                                <option value="">Seleccione un vehículo</option>
-                                @foreach (\App\Models\Vehiculo::all() as $vehiculo)
-                                    <option value="{{ $vehiculo->id }}" {{ old('vehiculo_id') == $vehiculo->id ? 'selected' : '' }}>
-                                        {{ $vehiculo->marca_modelo ?? $vehiculo->patente }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="font-bold text-gray-700 dark:text-gray-200">Tipo de Novedad:</label>
-                            <input type="text" name="tipo_novedad" value="{{ old('tipo_novedad') }}" class="w-full border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-200" placeholder="Ej: Accidente, Mantenimiento">
-                        </div>
-
-                        <div>
-                            <label class="font-bold text-gray-700 dark:text-gray-200">Aplica:</label>
-                            <input type="text" name="aplica" value="{{ old('aplica') }}" class="w-full border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-200" placeholder="Ej: Sí, No">
-                        </div>
-
-                        <div>
-                            <label class="font-bold text-gray-700 dark:text-gray-200">Observaciones:</label>
-                            <input type="text" name="observaciones" value="{{ old('observaciones') }}" class="w-full border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-200" placeholder="Opcional">
-                        </div>
-
-                    </div>
-
-                    <div class="mt-6 flex gap-3">
-                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
-                            Guardar
-                        </button>
-
-                        <a href="{{ route('novedades.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">
-                            Cancelar
-                        </a>
-                    </div>
-
-                </form>
+        {{-- Validación --}}
+        @if ($errors->any())
+            <div class="mb-4 p-4 rounded-lg border border-red-400 bg-red-100 text-red-700">
+                <ul class="list-disc ml-4 space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li class="text-sm">{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
+        @endif
+
+        {{-- Card principal --}}
+        <div class="card shadow-lg rounded-xl border p-6">
+
+            <form method="POST" action="{{ route('novedades.store') }}" class="space-y-6">
+                @csrf
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    {{-- Vehículo --}}
+                    <div>
+                        <label class="font-semibold" style="color: var(--foreground)">
+                            Vehículo asociado <span class="text-red-500">*</span>
+                        </label>
+                        <select name="vehiculo_id"
+                                class="mt-1 w-full px-4 py-3 rounded-lg border focus:ring-2"
+                                style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                            <option value="">Seleccionar vehículo</option>
+
+                            @foreach($vehiculos as $veh)
+                                <option value="{{ $veh->id }}"
+                                    {{ old('vehiculo_id') == $veh->id ? 'selected' : '' }}>
+                                    {{ $veh->marca_modelo }} — {{ $veh->dominio }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Tipo --}}
+                    <div>
+                        <label class="font-semibold" style="color: var(--foreground)">Tipo de Novedad</label>
+                        <input type="text"
+                               name="tipo_novedad"
+                               value="{{ old('tipo_novedad') }}"
+                               placeholder="Ej: Rotura, Evento, Control"
+                               class="mt-1 w-full px-4 py-3 rounded-lg border"
+                               style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                    </div>
+
+                    {{-- Aplica --}}
+                    <div>
+                        <label class="font-semibold" style="color: var(--foreground)">Aplica</label>
+                        <input type="text"
+                               name="aplica"
+                               value="{{ old('aplica') }}"
+                               placeholder="Ej: Sí, No"
+                               class="mt-1 w-full px-4 py-3 rounded-lg border"
+                               style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                    </div>
+
+                    {{-- Observaciones --}}
+                    <div>
+                        <label class="font-semibold" style="color: var(--foreground)">Observaciones</label>
+                        <input type="text"
+                               name="observaciones"
+                               value="{{ old('observaciones') }}"
+                               placeholder="Ingrese detalles opcionales"
+                               class="mt-1 w-full px-4 py-3 rounded-lg border"
+                               style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                    </div>
+                </div>
+
+                {{-- Botones --}}
+                <div class="flex justify-end gap-4 pt-6">
+                    <a href="{{ route('novedades.index') }}"
+                       class="px-5 py-3 rounded-lg"
+                       style="background: var(--muted); color: var(--muted-foreground)">
+                        Cancelar
+                    </a>
+
+                    <button type="submit"
+                            class="px-5 py-3 rounded-lg font-semibold"
+                            style="background: var(--primary); color: var(--primary-foreground)">
+                        Guardar Novedad
+                    </button>
+                </div>
+
+            </form>
+
         </div>
     </div>
 </x-app-layout>

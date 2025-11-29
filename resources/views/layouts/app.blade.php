@@ -1,4 +1,3 @@
-<!-- resources/views/layouts/app.blade.php -->
 @props(['header'])
 
 <!DOCTYPE html>
@@ -8,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Control Vehicular') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -16,18 +15,24 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     @livewireStyles
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
 </head>
 
-<body class="font-sans antialiased text-white bg-transparent">
+<body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
+
     <x-banner />
 
     <div class="min-h-screen flex flex-col">
-        <!-- Barra de navegación -->
-        @livewire('navigation-menu')
 
-        <!-- Encabezado dinámico -->
+        {{-- NAVIGATION MODERNO --}}
+        @include('layouts.navigation')
+
+
+        {{-- Encabezado dinámico --}}
         @isset($header)
             <header class="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md">
                 <div class="max-w-7xl mx-auto py-6 px-6 lg:px-8">
@@ -38,44 +43,27 @@
             </header>
         @endisset
 
-        <!-- Contenido principal -->
+        {{-- CONTENIDO --}}
         <main class="flex-1 py-10">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-2xl p-6 text-white">
+
+                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-2xl p-6">
                     {{ $slot }}
                 </div>
+
             </div>
         </main>
 
-        <footer class="bg-gray-100 dark:bg-gray-800 text-center text-sm text-white py-4 mt-auto">
-            <p>© {{ date('Y') }} {{ config('app.name', 'Laravel') }} — Todos los derechos reservados.</p>
+        {{-- Footer --}}
+        <footer class="bg-gray-100 dark:bg-gray-800 text-center text-sm text-gray-600 dark:text-gray-300 py-4 mt-auto">
+            © {{ date('Y') }} Control Vehicular — Todos los derechos reservados.
         </footer>
+
     </div>
 
     @stack('modals')
-    @stack('scripts') 
-
-    @vite(['resources/js/app.js'])
-
-<script>
-document.addEventListener('novedad-alerta', function(event) {
-
-    const data = event.detail;
-
-    const div = document.createElement('div');
-    div.className = "fixed top-4 right-4 bg-red-600 text-white px-4 py-3 rounded shadow-lg z-50";
-    div.innerHTML = `
-        <strong>⚠ Nueva novedad</strong><br>
-        Vehículo: ${data.vehiculo}<br>
-        ID: ${data.id}
-    `;
-
-    document.body.appendChild(div);
-
-    setTimeout(() => div.remove(), 6000);
-});
-</script>
-    
+    @stack('scripts')
     @livewireScripts
+
 </body>
 </html>

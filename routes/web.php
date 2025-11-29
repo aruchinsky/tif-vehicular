@@ -1,95 +1,137 @@
 <?php
 
-use App\Http\Controllers\AcompanianteController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ConductorController;
-use App\Http\Controllers\NovedadController;
-use App\Http\Controllers\PersonalControlController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\VehiculoController;
-use App\Http\Controllers\ProductividadController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PersonalControlController;
+use App\Http\Controllers\ConductorController;
+use App\Http\Controllers\AcompanianteController;
+use App\Http\Controllers\VehiculoController;
+use App\Http\Controllers\NovedadController;
+use App\Http\Controllers\ProductividadController;
 
-// ---------------------------------------
-// RUTAS DE AUTENTICACIÓN
-// ---------------------------------------
+//SIEMPRE QUE SE MODIFIQUEN ROLES, PERMISOS O SEEDERS, EJECUTAR:
+// php artisan cache:clear
+// php artisan permission:cache-reset
+// php artisan route:clear
+// php artisan optimize:clear
 
+
+//
+// -----------------------------------------------------------------------------
+// 🔵 RUTA PÚBLICA (LANDING)
+// -----------------------------------------------------------------------------
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard'); 
-})->name('dashboard');
+//
+// -----------------------------------------------------------------------------
+// 🟣 DASHBOARD – REDIRECCIÓN AUTOMÁTICA POR ROL
+// -----------------------------------------------------------------------------
+Route::get('/dashboard', DashboardController::class)
+    ->middleware(['auth'])
+    ->name('dashboard');
 
-Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
+//
+// -----------------------------------------------------------------------------
+// 🔵 SECCIÓN PARA PERSONAL DE CONTROL (ROL: CONTROL)
+// -----------------------------------------------------------------------------
+Route::middleware(['auth', 'role:CONTROL'])->prefix('control')->name('control.')->group(function () {
 
-    Route::get('me', [AuthController::class, 'me']);
-    Route::post('refresh', [AuthController::class, 'refresh']);
-    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
-});
-Route::get('/mi-ruta', [PersonalControlController::class, 'rutaAsignada'])->name('personalcontrol.ruta.asignada');
-Route::prefix('personalcontrol')->name('personalcontrol.')->group(function () { 
-    Route::get('/', [PersonalControlController::class, 'index'])->name('index');
-    Route::get('/create', [PersonalControlController::class, 'create'])->name('create');
-    Route::post('/', [PersonalControlController::class, 'store'])->name('store');
-    Route::get('/{personal_control}/edit', [PersonalControlController::class, 'edit'])->name('edit');
-    Route::get('/{personal_control}', [PersonalControlController::class, 'show'])->name('show');
-    Route::put('/{personal_control}', [PersonalControlController::class, 'update'])->name('update');
-    Route::delete('/{personal_control}', [PersonalControlController::class, 'destroy'])->name('destroy');
+    // Ruta asignada
+    Route::get('/mi-ruta', [PersonalControlController::class, 'rutaAsignada'])
+        ->name('ruta');
 
+    // Registrar Conductor
+    Route::get('/conductores/create', [ConductorController::class, 'create'])
+        ->name('conductores.create');
 
-});
-// ---------------------------------------
-// RUTAS DE PERSONAL CONTROL
-// ---------------------------------------
-//Route::resource('PersonalControl', PersonalControlController::class)->names('   PersonalControl');
-// ---------------------------------------
-// RUTAS DE VEHÍCULOS
-// ---------------------------------------
-Route::resource('vehiculo', VehiculoController::class);
+    Route::post('/conductores', [ConductorController::class, 'store'])
+        ->name('conductores.store');
 
-// ---------------------------------------
-// RUTAS DE CONDUCTORES
-// ---------------------------------------
-//Route::resource('conductores', ConductorController::class)->names('conductores'); 
-Route::get('conductores', [ConductorController::class, 'index'])->name('conductores.index');
-Route::get('conductores/create', [ConductorController::class, 'create'])->name('conductores.create');
-Route::post('conductores', [ConductorController::class, 'store'])->name('conductores.store');
-Route::get('conductores/{conductor}/edit', [ConductorController::class, 'edit'])->name('conductores.edit');
-Route::put('conductores/{conductor}', [ConductorController::class, 'update'])->name('conductores.update');
-Route::delete('conductores/{conductor}', [ConductorController::class, 'destroy'])->name('conductores.destroy');
-Route::get('conductores/{conductor}', [ConductorController::class, 'show'])->name('conductores.show');
+    // Registrar Acompañante
+    Route::get('/acompaniante/create', [AcompanianteController::class, 'create'])
+        ->name('acompaniante.create');
 
-// ---------------------------------------
-// RUTAS DE ACOMPAÑANTES
-// ---------------------------------------
-Route::resource('acompaniante', AcompanianteController::class);
-/*Route::get('acompaniante', [AcompanianteController::class, 'index'])->name('acompaniante.index');
-Route::post('acompañante', [AcompanianteController::class, 'store']);
-Route::get('acompañante/{acompañante}', [AcompanianteController::class, 'show']);
-Route::put('acompañante/{acompañante}', [AcompanianteController::class, 'update']);
-Route::delete('acompañante/{acompañante}', [AcompanianteController::class, 'destroy']);*/
+    Route::post('/acompaniante', [AcompanianteController::class, 'store'])
+        ->name('acompaniante.store');
 
-// ---------------------------------------
-// RUTAS DE NOVEDADES
-// ---------------------------------------
-Route::prefix('novedades')->name('novedades.')->group(function () {
-    Route::get('/', [NovedadController::class, 'index'])->name('index');
-    Route::get('/create', [NovedadController::class, 'create'])->name('create');
-    Route::post('/', [NovedadController::class, 'store'])->name('store');
-    Route::get('/{novedad}', [NovedadController::class, 'show'])->name('show');
-    Route::get('/{novedad}/edit', [NovedadController::class, 'edit'])->name('edit');
-    Route::put('/{novedad}', [NovedadController::class, 'update'])->name('update');
-    Route::delete('/{novedad}', [NovedadController::class, 'destroy'])->name('destroy');
+    // Registrar Vehículo
+    Route::get('/vehiculo/create', [VehiculoController::class, 'create'])
+        ->name('vehiculo.create');
+
+    Route::post('/vehiculo', [VehiculoController::class, 'store'])
+        ->name('vehiculo.store');
+
 });
 
 
+//
+// -----------------------------------------------------------------------------
+// 🔴 SECCIÓN PARA ADMINISTRADOR (ROL: ADMINISTRADOR)
+// -----------------------------------------------------------------------------
+Route::middleware(['auth', 'role:ADMINISTRADOR'])->group(function () {
 
-// ---------------------------------------
-// RUTAS DE PRODUCTIVIDAD//
-// ---------------------------------------
-Route::resource('productividades', ProductividadController::class)->parameters(['productividades' => 'productividad']);
-;
+    // ---------------------------------------------------------
+    // 🟦 PERSONAL DE CONTROL (CRUD Completo)
+    // ---------------------------------------------------------
+    Route::prefix('personalcontrol')->name('personalcontrol.')->group(function () {
+        Route::get('/', [PersonalControlController::class, 'index'])->name('index');
+        Route::get('/create', [PersonalControlController::class, 'create'])->name('create');
+        Route::post('/', [PersonalControlController::class, 'store'])->name('store');
+        Route::get('/{personal_control}', [PersonalControlController::class, 'show'])->name('show');
+        Route::get('/{personal_control}/edit', [PersonalControlController::class, 'edit'])->name('edit');
+        Route::put('/{personal_control}', [PersonalControlController::class, 'update'])->name('update');
+        Route::delete('/{personal_control}', [PersonalControlController::class, 'destroy'])->name('destroy');
+    });
+
+    // ---------------------------------------------------------
+    // 🟧 CONDUCTORES (CRUD Completo)
+    // ---------------------------------------------------------
+    Route::prefix('conductores')->name('conductores.')->group(function () {
+        Route::get('/', [ConductorController::class, 'index'])->name('index');
+        Route::get('/create', [ConductorController::class, 'create'])->name('create');
+        Route::post('/', [ConductorController::class, 'store'])->name('store');
+        Route::get('/{conductor}', [ConductorController::class, 'show'])->name('show');
+        Route::get('/{conductor}/edit', [ConductorController::class, 'edit'])->name('edit');
+        Route::put('/{conductor}', [ConductorController::class, 'update'])->name('update');
+        Route::delete('/{conductor}', [ConductorController::class, 'destroy'])->name('destroy');
+    });
+
+    // ---------------------------------------------------------
+    // 🟩 ACOMPAÑANTES (CRUD Completo)
+    // ---------------------------------------------------------
+    Route::resource('acompaniante', AcompanianteController::class);
+
+    // ---------------------------------------------------------
+    // 🟨 VEHÍCULOS (CRUD Completo)
+    // ---------------------------------------------------------
+    Route::resource('vehiculo', VehiculoController::class);
+
+    // ---------------------------------------------------------
+    // 🟪 NOVEDADES (CRUD Completo)
+    // ---------------------------------------------------------
+    Route::prefix('novedades')->name('novedades.')->group(function () {
+        Route::get('/', [NovedadController::class, 'index'])->name('index');
+        Route::get('/create', [NovedadController::class, 'create'])->name('create');
+        Route::post('/', [NovedadController::class, 'store'])->name('store');
+        Route::get('/{novedad}', [NovedadController::class, 'show'])->name('show');
+        Route::get('/{novedad}/edit', [NovedadController::class, 'edit'])->name('edit');
+        Route::put('/{novedad}', [NovedadController::class, 'update'])->name('update');
+        Route::delete('/{novedad}', [NovedadController::class, 'destroy'])->name('destroy');
+    });
+
+    // ---------------------------------------------------------
+    // 🟫 PRODUCTIVIDAD
+    // ---------------------------------------------------------
+
+    // Panel general (gráfico + tabla)
+    Route::get('/productividad', [ProductividadController::class, 'index'])
+        ->name('productividad.index');
+
+    // Ver registro individual
+    Route::get('/productividad/{id}', [ProductividadController::class, 'show'])
+        ->name('productividad.show');
+
+
+});

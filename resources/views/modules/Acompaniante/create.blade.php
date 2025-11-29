@@ -1,88 +1,109 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Crear Acompañante
+        <h2 class="text-xl font-bold" style="color: var(--foreground)">
+            Registrar Acompañante
         </h2>
     </x-slot>
 
-    <div class="py-6 max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-gray-800 shadow-xl sm:rounded-lg p-6">
+    <div class="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
-            {{-- Mostrar errores de validación --}}
+        {{-- Card moderna --}}
+        <div class="card shadow-lg border rounded-xl p-6">
+
+            {{-- Validación --}}
             @if ($errors->any())
-                <div class="mb-4">
-                    <ul class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div class="mb-4 p-4 rounded-lg border border-red-400 bg-red-100 text-red-700">
+                    <ul class="list-disc ml-4">
                         @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
+                            <li class="text-sm">{{ $error }}</li>
                         @endforeach
                     </ul>
                 </div>
             @endif
 
-           <form action="{{ route('acompaniante.store') }}" method="POST">
+            <form method="POST" action="{{ route('acompaniante.store') }}" class="space-y-6">
                 @csrf
-                
-                {{-- CAMPO SELECT: Conductor Asociado --}}
-                <div class="mb-4">
-                    <label for="conductor_id" class="block text-gray-700 dark:text-gray-200 font-semibold mb-1">Conductor Asociado <span class="text-red-500">*</span></label>
-                    <select name="conductor_id" id="conductor_id" required
-                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                {{-- Conductor Asociado --}}
+                <div class="space-y-1">
+                    <label for="conductor_id" class="font-semibold" style="color: var(--foreground)">
+                        Conductor Asociado <span class="text-red-500">*</span>
+                    </label>
+
+                    <select id="conductor_id" name="conductor_id" required
+                        class="w-full px-4 py-3 rounded-lg border focus:ring-2 transition"
+                        style="background: var(--card); border-color: var(--input); color: var(--foreground)">
                         <option value="">Seleccione un conductor</option>
-                        {{-- La variable $conductores viene del controlador --}}
+
                         @foreach ($conductores as $conductor)
-                            <option value="{{ $conductor->id }}" {{ old('conductor_id') == $conductor->id ? 'selected' : '' }}>
-                                {{ $conductor->nombre_apellido }} (DNI: {{ $conductor->dni_conductor }})
+                            <option value="{{ $conductor->id }}"
+                                {{ old('conductor_id') == $conductor->id ? 'selected' : '' }}>
+                                {{ $conductor->nombre_apellido }} — DNI: {{ $conductor->dni_conductor }}
                             </option>
                         @endforeach
                     </select>
-                    @error('conductor_id')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-                
-                {{-- DNI Acompañante --}}
-                <div class="mb-4">
-                    <label for="Dni_acompañante" class="block text-gray-700 dark:text-gray-200 font-semibold mb-1">DNI</label>
-                    <input type="text" name="Dni_acompañante" id="Dni_acompañante"
-                           value="{{ old('Dni_acompañante') }}"
-                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                {{-- Nombre y Apellido --}}
-                <div class="mb-4">
-                    <label for="Nombre_apellido" class="block text-gray-700 dark:text-gray-200 font-semibold mb-1">Nombre y Apellido</label>
-                    <input type="text" name="Nombre_apellido" id="Nombre_apellido"
-                           value="{{ old('Nombre_apellido') }}"
-                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
 
-                {{-- Domicilio --}}
-                <div class="mb-4">
-                    <label for="Domicilio" class="block text-gray-700 dark:text-gray-200 font-semibold mb-1">Domicilio</label>
-                    <input type="text" name="Domicilio" id="Domicilio"
-                           value="{{ old('Domicilio') }}"
-                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
+                {{-- DNI + Nombre + Domicilio + Tipo --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {{-- Tipo Acompañante --}}
-                <div class="mb-4">
-                    <label for="Tipo_acompañante" class="block text-gray-700 dark:text-gray-200 font-semibold mb-1">Tipo de acompañante</label>
-                    <input type="text" name="Tipo_acompañante" id="Tipo_acompañante"
-                           value="{{ old('Tipo_acompañante') }}"
-                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    {{-- DNI --}}
+                    <div>
+                        <label class="font-semibold" for="dni_acompaniante" style="color: var(--foreground)">DNI</label>
+                        <input id="dni_acompaniante" name="dni_acompaniante" type="text"
+                            value="{{ old('dni_acompaniante') }}"
+                            class="mt-1 w-full px-4 py-3 rounded-lg border focus:ring-2 transition"
+                            style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                    </div>
+
+                    {{-- Nombre --}}
+                    <div>
+                        <label class="font-semibold" for="nombre_apellido" style="color: var(--foreground)">
+                            Nombre y Apellido
+                        </label>
+                        <input id="nombre_apellido" name="nombre_apellido" type="text"
+                            value="{{ old('nombre_apellido') }}"
+                            class="mt-1 w-full px-4 py-3 rounded-lg border"
+                            style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                    </div>
+
+                    {{-- Domicilio --}}
+                    <div>
+                        <label class="font-semibold" for="domicilio" style="color: var(--foreground)">
+                            Domicilio
+                        </label>
+                        <input id="domicilio" name="domicilio" type="text"
+                            value="{{ old('domicilio') }}"
+                            class="mt-1 w-full px-4 py-3 rounded-lg border"
+                            style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                    </div>
+
+                    {{-- Tipo --}}
+                    <div>
+                        <label class="font-semibold" for="tipo_acompaniante" style="color: var(--foreground)">
+                            Tipo de Acompañante
+                        </label>
+                        <input id="tipo_acompaniante" name="tipo_acompaniante" type="text"
+                            value="{{ old('tipo_acompaniante') }}"
+                            class="mt-1 w-full px-4 py-3 rounded-lg border"
+                            style="background: var(--card); border-color: var(--input); color: var(--foreground)">
+                    </div>
                 </div>
 
                 {{-- Botones --}}
-                <div class="flex gap-3 mt-6">
-                    <button type="submit"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
-                        Guardar
-                    </button>
-                    <a href="{{ route('acompaniante.index') }}"
-                       class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">
+                <div class="flex justify-end gap-4 pt-4">
+                    <a href="javascript:window.history.back()"
+                    class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
                         Cancelar
                     </a>
-                </div>
 
+
+                    <button type="submit"
+                        class="px-5 py-3 rounded-lg font-semibold transition"
+                        style="background: var(--primary); color: var(--primary-foreground)">
+                        Guardar Acompañante
+                    </button>
+                </div>
             </form>
         </div>
     </div>
