@@ -12,22 +12,23 @@ class Vehiculo extends Model
     protected $table = 'vehiculo';
 
     protected $fillable = [
+        'control_id',
+        'operador_id',
+        'conductor_id',
         'fecha_hora_control',
         'marca_modelo',
         'dominio',
         'color',
-        'conductor_id',
-        'personal_control_id',
     ];
+
+    public function control()
+    {
+        return $this->belongsTo(ControlPolicial::class, 'control_id');
+    }
 
     public function conductor()
     {
         return $this->belongsTo(Conductor::class, 'conductor_id');
-    }
-
-    public function personalControl()
-    {
-        return $this->belongsTo(PersonalControl::class, 'personal_control_id');
     }
 
     public function novedades()

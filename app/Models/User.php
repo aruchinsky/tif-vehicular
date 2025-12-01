@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     use HasApiTokens;
     use HasFactory;
-    use HasProfilePhoto;
     use Notifiable;
+    use HasProfilePhoto;
     use TwoFactorAuthenticatable;
     use HasRoles;
 
@@ -23,7 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id',   // Rol principal del sistema (ADMIN / CONTROL)
+        'role_id', // Rol principal del sistema
     ];
 
     protected $hidden = [
@@ -45,34 +45,37 @@ class User extends Authenticatable
         ];
     }
 
-
     // ----------------------------------------------------------------
-    // RELACIONES DE NEGOCIO
+    // RELACIONES CORRECTAS
     // ----------------------------------------------------------------
 
-    // Relación con PersonalControl
-    public function personalControls()
+    // Relación correcta entre USER → PERSONAL
+    public function personal()
     {
-        return $this->hasMany(PersonalControl::class, 'user_id');
+        return $this->hasOne(Personal::class, 'user_id');
     }
 
-    public function getPersonalControlId()
+    // Controles creados por el Administrador
+    public function controlesCreados()
     {
-        $control = $this->personalControls()->first();
-        return $control ? $control->id : null;
+        return $this->hasMany(ControlPolicial::class, 'administrador_id');
     }
 
+    // ----------------------------------------------------------------
+    // ROLES PRINCIPALES (role_id)
+    // ----------------------------------------------------------------
 
-    // ----------------------------------------------------------------
-    // ROLES PRINCIPALES DEL SISTEMA (role_id)
-    // ----------------------------------------------------------------
+    public function isSuperUsuario(): bool
+    {
+        return $this->role_id === 0; // si lo usás
+    }
 
     public function isAdmin(): bool
     {
         return $this->role_id === 1;
     }
 
-    public function isControl(): bool
+    public function isOperador(): bool
     {
         return $this->role_id === 2;
     }

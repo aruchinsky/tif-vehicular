@@ -8,13 +8,13 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Limpia cache de roles y permisos (SPATIE)
+        // Limpia cache de Spatie
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 1️⃣ Crear roles y permisos
+        // Roles + Permisos
         $this->call(RolesAndPermissionsSeeder::class);
 
-        // 2️⃣ Poblado completo del sistema
+        // Datos demo completos
         $this->call(ControlVehicularDemoSeeder::class);
     }
 }

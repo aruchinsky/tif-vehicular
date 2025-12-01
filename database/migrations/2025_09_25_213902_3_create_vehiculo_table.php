@@ -1,5 +1,7 @@
 <?php
 
+// registrado por un operador dentro de un control policial
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,8 +18,18 @@ return new class extends Migration
             $table->string('dominio')->unique();
             $table->string('color')->nullable();
 
-            $table->foreignId('conductor_id')->constrained('conductor')->cascadeOnDelete();
-            $table->foreignId('personal_control_id')->constrained('personal_control')->cascadeOnDelete();
+            $table->foreignId('conductor_id')
+                  ->constrained('conductor')
+                  ->cascadeOnDelete();
+
+            $table->foreignId('control_id')
+                  ->constrained('controles_policiales')
+                  ->cascadeOnDelete();
+
+            // Policía asignado que cargó este vehículo
+            $table->foreignId('operador_id')
+                  ->constrained('control_personal')
+                  ->cascadeOnDelete();
 
             $table->timestamps();
         });

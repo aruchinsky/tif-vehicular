@@ -8,17 +8,26 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // ADMINISTRADOR → Panel completo
-        if ($user->hasRole('ADMINISTRADOR')) {
-            return redirect()->route('personalcontrol.index');
+        if (!$user) {
+            return redirect()->route('login');
         }
 
-        // PERSONAL DE CONTROL → Ruta asignada
-        if ($user->hasRole('CONTROL')) {
+        // SUPERUSUARIO → panel de controles
+        if ($user->hasRole('SUPERUSUARIO')) {
+            return redirect()->route('controles.index');
+        }
+
+        // ADMINISTRADOR → panel de controles
+        if ($user->hasRole('ADMINISTRADOR')) {
+            return redirect()->route('controles.index');
+        }
+
+        // OPERADOR → "Mi ruta" (controles donde está asignado)
+        if ($user->hasRole('OPERADOR')) {
             return redirect()->route('control.ruta');
         }
 
-        // Fallback seguro
+        // fallback
         return view('dashboard');
     }
 }

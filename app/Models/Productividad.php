@@ -12,15 +12,15 @@ class Productividad extends Model
     protected $table = 'productividad';
 
     protected $fillable = [
-        'personal_control_id',
+        'control_personal_id',
         'fecha',
         'total_conductor',
         'total_vehiculos',
         'total_acompanante',
     ];
 
-    public function personalControl()
+    public function controlPersonal()
     {
-        return $this->belongsTo(PersonalControl::class, 'personal_control_id');
+        return $this->belongsTo(ControlPersonal::class, 'control_personal_id');
     }
 }

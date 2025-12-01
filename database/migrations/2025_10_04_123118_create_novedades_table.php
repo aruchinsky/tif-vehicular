@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('novedades', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('vehiculo_id')->constrained('vehiculo')->cascadeOnDelete();
+            $table->foreignId('vehiculo_id')
+                  ->constrained('vehiculo')
+                  ->cascadeOnDelete();
 
             $table->string('tipo_novedad');
             $table->string('aplica')->nullable();

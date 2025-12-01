@@ -4,77 +4,83 @@ namespace App\Http\Controllers;
 
 use App\Models\Acompaniante;
 use App\Models\Conductor;
-use App\Models\Productividad;
 use Illuminate\Http\Request;
 
 class AcompanianteController extends Controller
 {
-    // 🔹 Mostrar todos los acompañantes
+    // 🔹 Listado
     public function index()
     {
-        $acompañantes = Acompaniante::all();
+        $acompañantes = Acompaniante::with('conductor')->get();
+
         return view('modules.Acompaniante.index', compact('acompañantes'));
     }
 
-    // 🔹 Mostrar formulario para crear
+    // 🔹 Formulario crear
     public function create()
     {
-        $conductores = Conductor::all(); // Obtener todos los conductores
-        return view('modules.Acompaniante.create', compact('conductores')); // Pasar a la vista
+        $conductores = Conductor::all();
+
+        return view('modules.Acompaniante.create', compact('conductores'));
     }
-    // 🔹 Guardar nuevo acompañante
+
+    // 🔹 Guardar
     public function store(Request $request)
     {
         $data = $request->validate([
             'conductor_id'      => 'required|integer|exists:conductor,id',
-            'dni_acompaniante' => 'required|string|max:20|unique:acompaniante,dni_acompaniante',
-            'nombre_apellido' => 'required|string|max:255',
-            'domicilio' => 'nullable|string|max:255',
+            'dni_acompaniante'  => 'required|string|max:20|unique:acompaniante,dni_acompaniante',
+            'nombre_apellido'   => 'required|string|max:255',
+            'domicilio'         => 'nullable|string|max:255',
             'tipo_acompaniante' => 'nullable|string|max:100',
         ]);
 
         Acompaniante::create($data);
-        $user = auth()->user();
-        if ($user && !$user->isAdmin()) {
-            $personalControlId = $user->getPersonalControlId();
-            if ($personalControlId) {
-                Productividad::logAction($personalControlId, 'total_acompanante');
-            }
-        }
-        return redirect()->route('acompaniante.index')->with('success', 'Acompañante registrado correctamente.');
+
+        return redirect()
+            ->route('acompaniante.index')
+            ->with('success', 'Acompañante registrado correctamente.');
     }
 
-    // 🔹 Mostrar detalle
+    // 🔹 Detalle
     public function show(Acompaniante $acompaniante)
     {
         return view('modules.Acompaniante.show', compact('acompaniante'));
     }
 
-    // 🔹 Mostrar formulario de edición
+    // 🔹 Formulario edición
     public function edit(Acompaniante $acompaniante)
     {
-        return view('modules.Acompaniante.edit', compact('acompaniante'));
+        $conductores = Conductor::all();
+
+        return view('modules.Acompaniante.edit', compact('acompaniante', 'conductores'));
     }
 
     // 🔹 Actualizar
     public function update(Request $request, Acompaniante $acompaniante)
     {
         $data = $request->validate([
-            'dni_acompaniante' => "required|string|max:20|unique:acompaniante,dni_acompaniante,{$acompaniante->id}",
-            'nombre_apellido' => 'required|string|max:255',
-            'domicilio' => 'nullable|string|max:255',
+            'conductor_id'      => 'required|integer|exists:conductor,id',
+            'dni_acompaniante'  => "required|string|max:20|unique:acompaniante,dni_acompaniante,{$acompaniante->id}",
+            'nombre_apellido'   => 'required|string|max:255',
+            'domicilio'         => 'nullable|string|max:255',
             'tipo_acompaniante' => 'nullable|string|max:100',
         ]);
 
         $acompaniante->update($data);
 
-        return redirect()->route('acompaniante.index')->with('success', 'Acompañante actualizado correctamente.');
+        return redirect()
+            ->route('acompaniante.index')
+            ->with('success', 'Acompañante actualizado correctamente.');
     }
 
     // 🔹 Eliminar
     public function destroy(Acompaniante $acompaniante)
     {
         $acompaniante->delete();
-        return redirect()->route('acompaniante.index')->with('success', 'Acompañante eliminado correctamente.');
+
+        return redirect()
+            ->route('acompaniante.index')
+            ->with('success', 'Acompañante eliminado correctamente.');
     }
 }

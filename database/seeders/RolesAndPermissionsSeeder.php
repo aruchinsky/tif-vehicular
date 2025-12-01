@@ -13,14 +13,14 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // ================================================================
-        // 📌 PERMISOS POR MÓDULO DEL SISTEMA
+        // 📌 PERMISOS DEL SISTEMA (granulares)
         // ================================================================
-
         $entitiesPermissions = [
             'usuarios' => ['crear', 'ver', 'editar', 'eliminar'],
-            'personal control' => ['crear', 'ver', 'editar', 'eliminar'],
+            'personal' => ['crear', 'ver', 'editar', 'eliminar'],
+            'controles' => ['crear', 'ver', 'editar', 'eliminar'],
             'conductores' => ['crear', 'ver', 'editar', 'eliminar'],
-            'acompañantes' => ['crear', 'ver', 'editar', 'eliminar'],
+            'acompaniante' => ['crear', 'ver', 'editar', 'eliminar'],
             'vehiculos' => ['crear', 'ver', 'editar', 'eliminar'],
             'novedades' => ['crear', 'ver', 'editar', 'eliminar'],
             'productividad' => ['ver', 'generar'],
@@ -28,7 +28,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'alertas' => ['ver'],
         ];
 
-        // Crear permisos
         foreach ($entitiesPermissions as $entity => $actions) {
             foreach ($actions as $action) {
                 Permission::firstOrCreate([
@@ -39,12 +38,12 @@ class RolesAndPermissionsSeeder extends Seeder
         }
 
         // ================================================================
-        // 📌 ROLES PRINCIPALES DEL SISTEMA
+        // 📌 ROLES
         // ================================================================
-
         $roles = [
+            'SUPERUSUARIO',
             'ADMINISTRADOR',
-            'CONTROL',
+            'OPERADOR',
         ];
 
         foreach ($roles as $roleName) {
@@ -52,15 +51,22 @@ class RolesAndPermissionsSeeder extends Seeder
         }
 
         // ================================================================
-        // 📌 ASIGNACIÓN DE PERMISOS A ROLES
+        // 📌 ASIGNACIÓN DE PERMISOS
         // ================================================================
-
         $rolesPermissions = [
-            'ADMINISTRADOR' => Permission::pluck('name')->toArray(),
+            'SUPERUSUARIO' => Permission::pluck('name')->toArray(),
 
-            'CONTROL' => [
+            'ADMINISTRADOR' => [
+                'crear controles', 'ver controles', 'editar controles',
+                'crear personal', 'ver personal',
+                'ver productividad',
+                'ver reportes',
+                'ver alertas',
+            ],
+
+            'OPERADOR' => [
                 'crear conductores', 'ver conductores',
-                'crear acompañantes', 'ver acompañantes',
+                'crear acompaniante', 'ver acompaniante',
                 'crear vehiculos', 'ver vehiculos',
                 'crear novedades', 'ver novedades',
                 'ver productividad',
@@ -68,8 +74,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($rolesPermissions as $roleName => $permissions) {
-            $role = Role::where('name', $roleName)->first();
-            $role->syncPermissions($permissions);
+            Role::where('name', $roleName)->first()->syncPermissions($permissions);
         }
     }
 }

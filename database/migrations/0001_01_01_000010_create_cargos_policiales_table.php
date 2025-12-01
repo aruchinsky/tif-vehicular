@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('cargos_policiales', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique();
+            $table->string('nombre')->unique(); // Chofer, Operador, Planillero, etc.
             $table->timestamps();
         });
     }

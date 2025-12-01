@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('productividad', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('personal_control_id')->constrained('personal_control')->cascadeOnDelete();
+            $table->foreignId('control_personal_id')
+                  ->constrained('control_personal')
+                  ->cascadeOnDelete();
 
             $table->date('fecha');
             $table->integer('total_conductor')->default(0);

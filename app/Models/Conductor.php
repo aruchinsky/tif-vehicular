@@ -25,8 +25,9 @@ class Conductor extends Model
         return $this->hasMany(Acompaniante::class, 'conductor_id');
     }
 
+
     public function vehiculos()
     {
-        return $this->hasMany(Vehiculo::class, 'conductor_id');
+        return $this->hasMany(Vehiculo::class);
     }
 }

@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('domicilio')->nullable();
             $table->string('tipo_acompaniante')->nullable();
 
-            $table->foreignId('conductor_id')->constrained('conductor')->cascadeOnDelete();
+            $table->foreignId('conductor_id')
+                  ->constrained('conductor')
+                  ->cascadeOnDelete();
 
             $table->timestamps();
         });

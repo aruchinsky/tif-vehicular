@@ -21,6 +21,6 @@ class Acompaniante extends Model
 
     public function conductor()
     {
-        return $this->belongsTo(Conductor::class, 'conductor_id');
+        return $this->belongsTo(Conductor::class);
     }
 }

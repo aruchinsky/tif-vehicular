@@ -10,14 +10,12 @@ return new class extends Migration
     {
         Schema::create('conductor', function (Blueprint $table) {
             $table->id();
-
             $table->string('dni_conductor')->unique();
             $table->string('nombre_apellido');
             $table->string('domicilio')->nullable();
             $table->string('categoria_carnet')->nullable();
             $table->string('tipo_conductor')->nullable();
             $table->string('destino')->nullable();
-
             $table->timestamps();
         });
     }
