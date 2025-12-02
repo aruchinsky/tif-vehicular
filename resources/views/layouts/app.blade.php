@@ -9,61 +9,60 @@
 
     <title>{{ config('app.name', 'Control Vehicular') }}</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+    {{-- APLICAR TEMA ANTES DE CARGAR --}}
+    <script>
+        (() => {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+        })();
+    </script>
 
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+
     <style>
         [x-cloak] { display: none !important; }
     </style>
-
 </head>
 
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
 
     <x-banner />
 
-    <div class="min-h-screen flex flex-col">
+    {{-- NAV SUPERIOR (YA NO HAY HEADER ABAJO) --}}
+    @include('layouts.navigation')
 
-        {{-- NAVIGATION MODERNO --}}
-        @include('layouts.navigation')
+    {{-- CONTENIDO PRINCIPAL MODERNO --}}
+    <main class="py-10" style="background-color: var(--background); transition: background 0.3s;">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
+            {{-- CARD CONTENEDORA --}}
+            <div class="shadow-sm sm:rounded-2xl p-8"
+                style="background-color: var(--card); color: var(--card-foreground); transition: background 0.3s, color 0.3s;">
 
-        {{-- Encabezado dinámico --}}
-        @isset($header)
-            <header class="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md">
-                <div class="max-w-7xl mx-auto py-6 px-6 lg:px-8">
-                    <h2 class="font-semibold text-2xl text-white leading-tight">
+                {{-- TÍTULO --}}
+                @isset($header)
+                    <h1 class="text-3xl font-bold mb-8" 
+                        style="color: var(--foreground); transition: color 0.3s;">
                         {{ $header }}
-                    </h2>
-                </div>
-            </header>
-        @endisset
+                    </h1>
+                @endisset
 
-        {{-- CONTENIDO --}}
-        <main class="flex-1 py-10">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-2xl p-6">
-                    {{ $slot }}
-                </div>
+                {{ $slot }}
 
             </div>
-        </main>
 
-        {{-- Footer --}}
-        <footer class="bg-gray-100 dark:bg-gray-800 text-center text-sm text-gray-600 dark:text-gray-300 py-4 mt-auto">
-            © {{ date('Y') }} Control Vehicular — Todos los derechos reservados.
-        </footer>
+        </div>
+    </main>
 
-    </div>
+
+    {{-- FOOTER --}}
+    <footer class="bg-gray-100 dark:bg-gray-800 text-center text-sm text-gray-600 dark:text-gray-300 py-4">
+        © {{ date('Y') }} Control Vehicular — Todos los derechos reservados.
+    </footer>
 
     @stack('modals')
     @stack('scripts')
     @livewireScripts
-
 </body>
 </html>

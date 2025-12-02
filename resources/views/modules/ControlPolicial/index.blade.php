@@ -31,18 +31,39 @@
                             <th class="py-3 text-left">Lugar</th>
                             <th class="py-3 text-left">Ruta</th>
                             <th class="py-3 text-left">Móvil</th>
+                            <th class="py-3 text-left">Estado</th>
                             <th class="py-3 text-left">Acciones</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         @foreach ($controles as $control)
+
+                            @php
+                                $vehiculos = $control->vehiculosControlados->count();
+
+                                if ($vehiculos === 0) {
+                                    $estado = 'Sin actividad';
+                                    $color = 'bg-gray-300 text-gray-800';
+                                } elseif ($vehiculos > 0) {
+                                    $estado = 'Con actividad';
+                                    $color = 'bg-green-200 text-green-800';
+                                }
+                            @endphp
+
                             <tr class="border-b hover:bg-[var(--muted)] transition"
                                 style="border-color: var(--border)">
                                 <td class="py-3">{{ $control->fecha }}</td>
                                 <td>{{ $control->lugar }}</td>
                                 <td>{{ $control->ruta ?? '—' }}</td>
                                 <td>{{ $control->movil_asignado ?? '—' }}</td>
+
+                                {{-- Estado --}}
+                                <td>
+                                    <span class="px-2 py-1 rounded text-xs font-semibold {{ $color }}">
+                                        {{ $estado }}
+                                    </span>
+                                </td>
 
                                 <td>
                                     <a href="{{ route('controles.show', $control) }}"

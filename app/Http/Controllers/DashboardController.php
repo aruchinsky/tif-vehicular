@@ -12,19 +12,19 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
-        // SUPERUSUARIO → panel de controles
+        // SUPERUSUARIO
         if ($user->hasRole('SUPERUSUARIO')) {
-            return redirect()->route('controles.index');
+            return redirect()->route('dashboard.super');
         }
 
-        // ADMINISTRADOR → panel de controles
+        // ADMINISTRADOR
         if ($user->hasRole('ADMINISTRADOR')) {
-            return redirect()->route('controles.index');
+            return redirect()->route('dashboard.admin');
         }
 
-        // OPERADOR → "Mi ruta" (controles donde está asignado)
+        // OPERADOR
         if ($user->hasRole('OPERADOR')) {
-            return redirect()->route('control.ruta');
+            return redirect()->route('dashboard.operador');
         }
 
         // fallback

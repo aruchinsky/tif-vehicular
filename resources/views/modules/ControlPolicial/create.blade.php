@@ -3,6 +3,17 @@
         Crear Nuevo Control Policial
     </x-slot>
 
+            <div class="flex items-center gap-3 mb-6">
+
+                {{-- Volver --}}
+                <a href="{{ route('dashboard') }}"
+                class="px-4 py-2 rounded-lg font-semibold text-sm shadow
+                        bg-[var(--primary)] text-[var(--primary-foreground)]
+                        hover:opacity-90 transition">
+                    ← Volver al Panel
+                </a>
+            </div>
+
     <form action="{{ route('controles.store') }}" method="POST">
         @csrf
 
@@ -57,17 +68,18 @@
 
                     <div class="flex-1">
                         <label class="font-semibold">Seleccionar policía</label>
+
+                        {{-- SELECT DINÁMICO --}}
                         <select x-model="selected" class="w-full rounded">
                             <option value="">— Seleccionar —</option>
 
-                            @foreach ($personal as $p)
-                                <option value="{{ $p->id }}">
-                                    {{ $p->nombre_apellido }} — {{ $p->cargo->nombre ?? 'Sin cargo' }}
-                                </option>
-                            @endforeach
+                            <template x-for="p in listaPersonal" :key="p.id">
+                                <option :value="p.id" x-text="p.nombre"></option>
+                            </template>
                         </select>
                     </div>
 
+                    {{-- BOTÓN AGREGAR --}}
                     <button type="button"
                             @click="agregar()"
                             class="px-4 py-2 bg-[var(--primary)] text-white rounded shadow">
@@ -78,7 +90,7 @@
                     <button 
                         type="button"
                         class="px-4 py-2 rounded bg-[var(--secondary)] text-white"
-                        x-on:click="
+                        @click="
                             window.dispatchEvent(
                                 new CustomEvent('open-modal', { detail: 'modal-nuevo-policial' })
                             )
@@ -129,38 +141,73 @@
         </div>
     </form>
 
-    {{-- MODAL NUEVO POLICÍA USANDO NUESTRO COMPONENTE SIMPLE --}}
+    {{-- MODAL NUEVO POLICÍA --}}
     <x-modal-simple name="modal-nuevo-policial" maxWidth="lg">
         @include('modules.ControlPolicial.partials.modal-nuevo-policial')
     </x-modal-simple>
 
     {{-- SCRIPT ALPINE --}}
     <script>
+        // Variables globales temporales para comunicación modal → create
+        let ultimoPolicialCreado = null;
+
+        // Listener global del evento
+        window.addEventListener('policial-creado', e => {
+            ultimoPolicialCreado = {
+                id: e.detail.id,
+                nombre: e.detail.nombre
+            };
+        });
+
         function controlPersonal() {
             return {
                 selected: "",
                 asignados: [],
 
+                listaPersonal: @json(
+                    $personal->map(fn($p) => [
+                        'id' => $p->id,
+                        'nombre' => $p->nombre_apellido
+                    ])
+                ),
+
                 init() {
-                    window.addEventListener('policial-creado', e => {
-                        this.asignados.push({
-                            id: e.detail.id,
-                            nombre: e.detail.nombre
-                        });
-                    });
+                    // Cada 200ms chequeamos si hay uno nuevo agregado por el modal
+                    setInterval(() => {
+
+                        if (ultimoPolicialCreado !== null) {
+
+                            // 1) Agregar a la lista de asignados
+                            this.asignados.push({
+                                id: ultimoPolicialCreado.id,
+                                nombre: ultimoPolicialCreado.nombre
+                            });
+
+                            // 2) Agregar al select
+                            this.listaPersonal.push({
+                                id: ultimoPolicialCreado.id,
+                                nombre: ultimoPolicialCreado.nombre
+                            });
+
+                            // Borrar buffer
+                            ultimoPolicialCreado = null;
+                        }
+
+                    }, 200);
                 },
 
                 agregar() {
                     if (!this.selected) return;
 
-                    let select = document.querySelector('select[x-model="selected"]') ?? 
-                                 event.target.closest('div').querySelector("select");
+                    if (this.asignados.some(a => a.id == this.selected)) {
+                        return;
+                    }
 
-                    let option = select.selectedOptions[0];
+                    let item = this.listaPersonal.find(p => p.id == this.selected);
 
                     this.asignados.push({
-                        id: this.selected,
-                        nombre: option.textContent,
+                        id: item.id,
+                        nombre: item.nombre
                     });
 
                     this.selected = "";
@@ -172,5 +219,6 @@
             }
         }
     </script>
+
 
 </x-app-layout>

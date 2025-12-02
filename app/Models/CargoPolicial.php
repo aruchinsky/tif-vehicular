@@ -15,7 +15,7 @@ class CargoPolicial extends Model
 
     public function personal()
     {
-        return $this->hasMany(Personal::class);
+        return $this->hasMany(Personal::class, 'cargo_id');
     }
 
     public function rolesOperativosAsignados()

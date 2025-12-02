@@ -35,4 +35,11 @@ class Vehiculo extends Model
     {
         return $this->hasMany(Novedad::class, 'vehiculo_id');
     }
+
+    public function operador()
+    {
+        return $this->belongsTo(Personal::class, 'operador_id');
+    }
+
 }
+

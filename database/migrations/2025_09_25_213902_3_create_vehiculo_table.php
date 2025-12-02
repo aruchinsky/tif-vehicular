@@ -28,8 +28,9 @@ return new class extends Migration
 
             // Policía asignado que cargó este vehículo
             $table->foreignId('operador_id')
-                  ->constrained('control_personal')
-                  ->cascadeOnDelete();
+                ->constrained('personal')
+                ->cascadeOnDelete();
+
 
             $table->timestamps();
         });

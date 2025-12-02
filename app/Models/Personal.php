@@ -35,4 +35,10 @@ class Personal extends Model
     {
         return $this->hasMany(ControlPersonal::class, 'personal_id');
     }
+
+    public function vehiculosCargados()
+    {
+        return $this->hasMany(Vehiculo::class, 'operador_id');
+    }
+
 }

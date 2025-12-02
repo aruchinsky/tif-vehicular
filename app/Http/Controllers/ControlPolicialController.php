@@ -6,6 +6,13 @@ use App\Models\ControlPolicial;
 use App\Models\ControlPersonal;
 use App\Models\Personal;
 use Illuminate\Http\Request;
+use App\Models\Vehiculo;
+use App\Models\Conductor;
+use App\Models\Acompaniante;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use App\Models\CargoPolicial;
+
 
 class ControlPolicialController extends Controller
 {
@@ -95,29 +102,106 @@ class ControlPolicialController extends Controller
      */
     public function show(ControlPolicial $control)
     {
+        // Cargar relaciones necesarias
         $control->load([
             'administrador',
-
-            // Personal asignado
             'personalAsignado.personal',
             'personalAsignado.personal.cargo',
             'personalAsignado.rolOperativo',
             'personalAsignado.personal.usuario',
-
-            // Vehículos requisados
             'vehiculosControlados.conductor',
             'vehiculosControlados.conductor.acompaniante',
             'vehiculosControlados.novedades',
+            'vehiculosControlados.operador',
         ]);
 
-        return view('modules.ControlPolicial.show', compact('control'));
+        // ============================
+        // 1) TOTALES GENERALES
+        // ============================
+        $totalVehiculos = $control->vehiculosControlados->count();
+        $totalConductores = $totalVehiculos;
+        $totalAcompanantes = $control->vehiculosControlados->sum(
+            fn($v) => $v->conductor?->acompaniante?->count() ?? 0
+        );
+        $totalNovedades = $control->vehiculosControlados->sum(
+            fn($v) => $v->novedades?->count() ?? 0
+        );
+
+        // ============================
+        // 2) PRODUCTIVIDAD POR OPERADOR
+        // ============================
+        $operadoresAsignados = $control->personalAsignado->filter(
+            fn($p) => strtoupper($p->rolOperativo?->nombre) === 'OPERADOR'
+        );
+
+        $labels = [];
+        $vehiculosData = [];
+        $acompanantesData = [];
+        $novedadesData = [];
+
+        foreach ($operadoresAsignados as $asig) {
+
+            $persona = $asig->personal;
+            $vehiculos = $persona->vehiculosCargados ?? collect();
+
+            $labels[] = $persona->nombre_apellido;
+            $vehiculosData[] = $vehiculos->count();
+            $acompanantesData[] = $vehiculos->sum(fn($v) => $v->conductor?->acompaniante?->count() ?? 0);
+            $novedadesData[] = $vehiculos->sum(fn($v) => $v->novedades?->count() ?? 0);
+        }
+
+        $graficoOperadores = [
+            'labels'        => $labels,
+            'vehiculos'     => $vehiculosData,
+            'acompanantes'  => $acompanantesData,
+            'novedades'     => $novedadesData,
+        ];
+
+        return view('modules.ControlPolicial.show', compact(
+            'control',
+            'totalVehiculos',
+            'totalConductores',
+            'totalAcompanantes',
+            'totalNovedades',
+            'graficoOperadores'
+        ));
     }
 
 
     public function edit(ControlPolicial $control)
     {
-        return view('modules.ControlPolicial.edit', compact('control'));
+        $control->load([
+            'personalAsignado.personal',
+            'personalAsignado.rolOperativo',
+        ]);
+
+        $personal = Personal::orderBy('nombre_apellido')->get();
+        $cargos = CargoPolicial::orderBy('nombre')->get();
+
+        // Preparamos datos para Alpine (evitamos fn() => [...] dentro del Blade)
+        $asignados = $control->personalAsignado->map(function ($cp) {
+            return [
+                'id'     => $cp->personal_id,
+                'nombre' => $cp->personal->nombre_apellido,
+                'rol_id' => $cp->rol_operativo_id,
+            ];
+        });
+
+        $listaPersonal = $personal->map(function ($p) {
+            return [
+                'id'     => $p->id,
+                'nombre' => $p->nombre_apellido,
+            ];
+        });
+
+        return view('modules.ControlPolicial.edit', compact(
+            'control',
+            'cargos',
+            'asignados',
+            'listaPersonal'
+        ));
     }
+
 
     public function update(Request $request, ControlPolicial $control)
     {
@@ -128,23 +212,54 @@ class ControlPolicialController extends Controller
             'lugar'        => 'required|string|max:255',
             'ruta'         => 'nullable|string|max:255',
             'movil_asignado' => 'nullable|string|max:255',
+
+            'personal'     => 'required|array',
+            'roles'        => 'required|array',
         ]);
 
+        // Actualizamos datos del operativo
         $control->update($data);
 
+        // Sincronizar personal asignado:
+        // Borramos asignaciones actuales y las volvemos a crear según el formulario
+        \App\Models\ControlPersonal::where('control_id', $control->id)->delete();
+
+        foreach ($data['personal'] as $personalId) {
+            \App\Models\ControlPersonal::create([
+                'control_id'       => $control->id,
+                'personal_id'      => $personalId,
+                'rol_operativo_id' => $data['roles'][$personalId] ?? null,
+            ]);
+        }
+
         return redirect()
-            ->route('controles.show', $control)
+            ->route('dashboard')
             ->with('success', 'Control policial actualizado correctamente.');
+
     }
+
 
     public function destroy(ControlPolicial $control)
     {
+        // Chequear si el control tiene novedades en cualquiera de sus vehículos
+        $tieneNovedades = $control->vehiculosControlados()
+            ->whereHas('novedades')
+            ->exists();
+
+        if ($tieneNovedades) {
+            return redirect()
+                ->route('controles.show', $control)
+                ->with('error', 'No se puede eliminar este control porque ya tiene novedades registradas.');
+        }
+
+        // Si NO tiene novedades → eliminar normalmente
         $control->delete();
 
         return redirect()
-            ->route('controles.index')
-            ->with('success', 'Control eliminado correctamente.');
+            ->route('dashboard')
+            ->with('success', 'Control policial eliminado correctamente.');
     }
+
 
     /**
      * "Mi ruta" para OPERADOR: controles donde el usuario está asignado
