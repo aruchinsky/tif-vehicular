@@ -32,14 +32,24 @@ class NovedadController extends Controller
             'observaciones' => 'nullable|string|max:255',
         ]);
 
+        // Crear la novedad
         $novedad = Novedad::create($data);
 
+        // Cargar relaciones necesarias para la alerta
+        $novedad->load([
+            'vehiculo',
+            'vehiculo.conductor',
+            'vehiculo.control',
+        ]);
+
+        // Emitir el evento INMEDIATAMENTE (sin colas)
         event(new NovedadCreada($novedad));
 
         return redirect()
             ->route('novedades.index')
             ->with('success', 'Novedad creada correctamente.');
     }
+
 
     public function show(Novedad $novedad)
     {
@@ -77,4 +87,34 @@ class NovedadController extends Controller
             ->route('novedades.index')
             ->with('success', 'Novedad eliminada correctamente.');
     }
+
+    // ----------------------------------------------------------
+    // REGISTRAR NOVEDAD DESDE OPERADOR
+    // ----------------------------------------------------------
+    public function storeOperador(Request $request)
+    {
+        $data = $request->validate([
+            'vehiculo_id'   => 'required|exists:vehiculo,id',
+            'tipo_novedad'  => 'required|string|max:255',
+            'aplica'        => 'nullable|string|max:255',
+            'observaciones' => 'nullable|string',
+            'control_id'    => 'required|exists:controles_policiales,id',
+        ]);
+
+        // Crear novedad
+        $novedad = Novedad::create([
+            'vehiculo_id'   => $data['vehiculo_id'],
+            'tipo_novedad'  => $data['tipo_novedad'],
+            'aplica'        => $data['aplica'],
+            'observaciones' => $data['observaciones'],
+        ]);
+
+        // Disparar evento en tiempo real
+        broadcast(new NovedadCreada($novedad))->toOthers();
+
+        return redirect()
+            ->route('control.operador.show', $data['control_id'])
+            ->with('success', 'Novedad registrada correctamente.');
+    }
+
 }

@@ -68,9 +68,7 @@ class ControlVehicularDemoSeeder extends Seeder
             // 2️⃣ CARGOS POLICIALES
             // ============================================================
 
-            $cargos = ['CHOFER', 'ESCOPETERO', 'OPERADOR', 'ENCARGADO', 'PLANILLERO',
-                'CHOFER/ESCOPETERO', 'CHOFER/OPERADOR', 'CHOFER/PLANILLERO',
-                'ESCOPETERO/OPERADOR', 'PLANILLERO/OPERADOR'];
+            $cargos = ['Chofer', 'Escopetero', 'Operador', 'Encargado', 'Planillero'];
             foreach ($cargos as $cargo) {
                 CargoPolicial::firstOrCreate(['nombre' => $cargo]);
             }

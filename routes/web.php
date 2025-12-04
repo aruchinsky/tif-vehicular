@@ -63,8 +63,18 @@ Route::middleware(['auth', 'role:OPERADOR|ADMINISTRADOR|SUPERUSUARIO'])
         // Registrar Conductor
         Route::get('/conductores/create', [ConductorController::class, 'create'])
             ->name('conductores.create');
-        Route::post('/conductores', [ConductorController::class, 'store'])
-            ->name('conductores.store');
+        // Registrar conductor desde el operador
+        Route::post('/conductores/store-operador', [ConductorController::class, 'storeOperador'])
+            ->name('conductores.store-operador');
+
+        // ==========================================================
+        // REGISTRO DE VEHÍCULO + CONDUCTOR DESDE OPERADOR (MODAL)
+        // ==========================================================
+        Route::post('/vehiculo/store-operador', [VehiculoController::class, 'storeOperador'])
+            ->name('vehiculo.store-operador');
+
+
+
 
         // Registrar Acompañante
         Route::get('/acompaniante/create', [AcompanianteController::class, 'create'])
@@ -77,6 +87,22 @@ Route::middleware(['auth', 'role:OPERADOR|ADMINISTRADOR|SUPERUSUARIO'])
             ->name('vehiculo.create');
         Route::post('/vehiculo', [VehiculoController::class, 'store'])
             ->name('vehiculo.store');
+
+        // Ver detalle de un control policial
+        Route::get('/operador/control/{control}', [OperadorDashboardController::class, 'show'])
+            ->name('operador.show');
+
+        // Exportación PDF del operativo
+        Route::get('/exportar/pdf/{control}', [OperadorDashboardController::class, 'exportPdf'])
+            ->name('export.pdf');
+
+        // ==========================================================
+        // REGISTRO DE NOVEDAD DESDE OPERADOR (MODAL)
+        // ==========================================================
+        Route::post('/novedades/store-operador', [NovedadController::class, 'storeOperador'])
+            ->name('novedades.store-operador');
+
+
     });
 
 // -----------------------------------------------------------------------------

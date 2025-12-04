@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
     )
 
@@ -54,7 +55,7 @@ return Application::configure(basePath: dirname(__DIR__))
     // ------------------------------------------------------------------------------
     ->withBroadcasting(
         base_path('routes/channels.php'),
-        attributes: ['middleware' => ['api', 'auth:api']]
+        attributes: ['middleware' => ['web', 'auth']]
     )
 
     // ------------------------------------------------------------------------------

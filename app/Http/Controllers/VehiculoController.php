@@ -102,4 +102,63 @@ class VehiculoController extends Controller
             ->route('vehiculo.index')
             ->with('success', 'Vehículo eliminado correctamente.');
     }
+
+    public function storeOperador(Request $request)
+    {
+        // VALIDACIÓN
+        $data = $request->validate([
+            // Vehículo
+            'marca_modelo' => 'required|string|max:255',
+            'dominio'      => 'required|string|max:20|unique:vehiculo,dominio',
+            'color'        => 'nullable|string|max:100',
+
+            // Conductor
+            'dni_conductor'    => 'required|string|max:20',
+            'nombre_apellido'  => 'required|string|max:255',
+            'domicilio'        => 'nullable|string|max:255',
+            'categoria_carnet' => 'nullable|string|max:50',
+            'tipo_conductor'   => 'nullable|string|max:50',
+            'destino'          => 'nullable|string|max:255',
+
+            // Metadatos
+            'control_id'  => 'required|integer|exists:controles_policiales,id',
+            'operador_id' => 'required|integer|exists:personal,id',
+        ]);
+
+        // ============================================================
+        // 1) CREAR O REUTILIZAR CONDUCTOR
+        // ============================================================
+        $conductor = Conductor::firstOrCreate(
+            ['dni_conductor' => $data['dni_conductor']],
+            [
+                'nombre_apellido'  => $data['nombre_apellido'],
+                'domicilio'        => $data['domicilio'],
+                'categoria_carnet' => $data['categoria_carnet'],
+                'tipo_conductor'   => $data['tipo_conductor'],
+                'destino'          => $data['destino'],
+            ]
+        );
+
+        // ============================================================
+        // 2) CREAR VEHÍCULO VINCULADO A CONTROL + CONDUCTOR + OPERADOR
+        // ============================================================
+        Vehiculo::create([
+            'fecha_hora_control' => now(),
+            'marca_modelo'       => $data['marca_modelo'],
+            'dominio'            => strtoupper($data['dominio']),
+            'color'              => $data['color'],
+
+            'conductor_id' => $conductor->id,
+            'control_id'   => $data['control_id'],
+            'operador_id'  => $data['operador_id'],
+        ]);
+
+        // ============================================================
+        // 3) REDIRECCIÓN CON ÉXITO
+        // ============================================================
+        return redirect()
+            ->route('control.operador.show', $data['control_id'])
+            ->with('success', 'Vehículo y conductor registrados correctamente.');
+    }
+
 }

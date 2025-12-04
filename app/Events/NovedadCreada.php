@@ -3,26 +3,26 @@
 namespace App\Events;
 
 use App\Models\Novedad;
-use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Queue\SerializesModels;
 
-class NovedadCreada implements ShouldBroadcast
+class NovedadCreada implements ShouldBroadcastNow
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use SerializesModels;
 
     public $novedad;
+    public $shouldBroadcastImmediately = true;
 
     public function __construct(Novedad $novedad)
     {
-        $this->novedad = $novedad->load('vehiculo');
+        // Cargar relaciones importantes
+        $this->novedad = $novedad->load('vehiculo.conductor');
     }
 
     public function broadcastOn()
     {
-        // Canal privado para administradores
         return new PrivateChannel('admin.alertas');
     }
 
