@@ -26,78 +26,108 @@
                 </a>
             </div>
 
-
-
-
             {{-- ========================================================
                  🔔 + USER + SWITCH — DESKTOP
             ======================================================== --}}
             <div class="hidden md:flex items-center relative space-x-4">
-                {{-- ===================================================== --}}
-                {{-- MENÚ COMPLETO PARA SUPERUSUARIO (DESKTOP) --}}
-                {{-- ===================================================== --}}
+
+                {{-- =====================================================
+                    MENÚ COMPLETO PARA SUPERUSUARIO (DESKTOP)
+                ===================================================== --}}
                 @hasrole('SUPERUSUARIO')
                 <div class="flex items-center gap-4">
 
+                    {{-- INICIO --}}
                     <a href="{{ route('dashboard.super') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
-                        Dashboard
+                       class="text-sm font-semibold hover:underline"
+                       style="color:var(--foreground);">
+                        Inicio
                     </a>
 
+                    {{-- PERSONAL --}}
                     <a href="{{ route('personalcontrol.index') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
+                       class="text-sm font-semibold hover:underline"
+                       style="color:var(--foreground);">
                         Personal
                     </a>
 
-                    <a href="{{ route('controles.index') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
-                        Controles
-                    </a>
+                    {{-- CONTROL POLICIAL (DROPDOWN) --}}
+                    <div x-data="{ openCP:false }" class="relative">
 
-                    <a href="{{ route('vehiculo.index') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
-                        Vehículos
-                    </a>
+                        <button @click="openCP = !openCP"
+                                class="text-sm font-semibold hover:underline flex items-center gap-1"
+                                style="color:var(--foreground);">
+                            Control Policial ▾
+                        </button>
 
-                    <a href="{{ route('conductores.index') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
-                        Conductores
-                    </a>
+                        <div x-show="openCP" x-transition x-cloak
+                             @click.away="openCP=false"
+                             class="absolute left-0 mt-2 w-48 rounded-xl shadow-xl border z-50"
+                             style="background: var(--card); border-color: var(--border);">
 
-                    <a href="{{ route('acompaniante.index') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
-                        Acompañantes
-                    </a>
+                            <a href="{{ route('controles.index') }}"
+                               class="block px-4 py-2 text-sm hover:bg-[var(--muted)] transition">
+                                Ver Controles
+                            </a>
+                            <a href="{{ route('vehiculo.index') }}"
+                               class="block px-4 py-2 text-sm hover:bg-[var(--muted)] transition">
+                                Vehículos
+                            </a>
+                            <a href="{{ route('conductores.index') }}"
+                               class="block px-4 py-2 text-sm hover:bg-[var(--muted)] transition">
+                                Conductores
+                            </a>
+                            <a href="{{ route('acompaniante.index') }}"
+                               class="block px-4 py-2 text-sm hover:bg-[var(--muted)] transition">
+                                Acompañantes
+                            </a>
+                            <a href="{{ route('novedades.index') }}"
+                               class="block px-4 py-2 text-sm hover:bg-[var(--muted)] transition">
+                                Novedades
+                            </a>
 
-                    <a href="{{ route('novedades.index') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
-                        Novedades
-                    </a>
+                        </div>
+                    </div>
 
+                    {{-- PRODUCTIVIDAD --}}
                     <a href="{{ route('productividad.index') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
+                       class="text-sm font-semibold hover:underline"
+                       style="color:var(--foreground);">
                         Productividad
                     </a>
 
-                    <a href="{{ route('cargos-policiales.index') }}"
-                    class="text-sm font-semibold hover:underline"
-                    style="color:var(--foreground);">
-                        Cargos
-                    </a>
+                    {{-- CONFIGURACIÓN (DROPDOWN) --}}
+                    <div x-data="{ openCfg:false }" class="relative">
+
+                        <button @click="openCfg = !openCfg"
+                                class="text-sm font-semibold hover:underline flex items-center gap-1"
+                                style="color:var(--foreground);">
+                            Configuración ▾
+                        </button>
+
+                        <div x-show="openCfg" x-transition x-cloak
+                             @click.away="openCfg=false"
+                             class="absolute left-0 mt-2 w-48 rounded-xl shadow-xl border z-50"
+                             style="background: var(--card); border-color: var(--border);">
+
+                            <a href="{{ route('cargos-policiales.index') }}"
+                               class="block px-4 py-2 text-sm hover:bg-[var(--muted)] transition">
+                                Cargos Policiales
+                            </a>
+
+                            {{-- Ajustá esta ruta si tu módulo de usuarios usa otra --}}
+                            <a href="{{ route('usuarios.index') }}"
+                               class="block px-4 py-2 text-sm hover:bg-[var(--muted)] transition">
+                                Usuarios
+                            </a>
+
+                        </div>
+                    </div>
 
                 </div>
                 @endhasrole
 
-
-                {{-- SWITCH DE TEMA (DESKTOP) --}}
+                {{-- SWITCH DE TEMA --}}
                 <button x-data
                         @click="
                             const html = document.documentElement;
@@ -121,8 +151,6 @@
                 </button>
 
 
-
-
                 {{-- USER MENU DESKTOP --}}
                 <div x-data="{ uopen:false }" class="relative">
 
@@ -135,11 +163,14 @@
                         </svg>
 
                         <span class="text-sm font-semibold text-[var(--foreground)]">
-                            {{ auth()->user()->name }}
+                            {{
+                                auth()->user()->personal
+                                    ? auth()->user()->personal->nombre_apellido
+                                    : auth()->user()->name
+                            }}
                         </span>
                     </button>
 
-                    {{-- DROPDOWN --}}
                     <div x-show="uopen" x-transition x-cloak
                         @click.away="uopen=false"
                         class="absolute right-0 mt-2 w-48 rounded-xl shadow-xl border z-50"
@@ -158,10 +189,7 @@
                             </button>
                         </form>
                     </div>
-
                 </div>
-
-
 
 
                 {{-- CAMPANA DESKTOP --}}
@@ -171,7 +199,8 @@
                     <button @click="open = !open"
                         class="relative p-2 rounded-full hover:bg-[var(--muted)] transition">
 
-                        <svg class="w-6 h-6 text-[var(--foreground)]" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <svg class="w-6 h-6 text-[var(--foreground)]"
+                             fill="none" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M15 17h5l-1.4-1.4A2 2 0 0118 14V10a6 6 0 10-12 0v4c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 01-6 0"/>
                         </svg>
@@ -183,8 +212,6 @@
                         </template>
                     </button>
 
-
-                    {{-- LISTA NOTIFICACIONES --}}
                     <div x-show="open" x-transition x-cloak
                         @click.away="open=false"
                         class="absolute right-0 mt-2 w-80 rounded-xl shadow-xl border z-50"
@@ -198,7 +225,7 @@
 
                             <template x-if="notificaciones.length === 0">
                                 <p class="p-4 text-sm text-center text-[var(--muted-foreground)]">
-                                    No hay notificaciones
+                                    No hay nuevas notificaciones
                                 </p>
                             </template>
 
@@ -206,13 +233,16 @@
                                 <div class="p-4 border-b hover:bg-[var(--muted)] cursor-pointer transition"
                                      style="border-color:var(--border);">
 
-                                    <p class="text-red-600 font-semibold text-sm">🚨 <span x-text="item.tipo"></span></p>
+                                    <p class="text-red-600 font-semibold text-sm">
+                                        🚨 <span x-text="item.tipo"></span>
+                                    </p>
                                     <p class="text-xs text-[var(--muted-foreground)]">
                                         Vehículo: <span x-text="item.dominio"></span>
                                     </p>
                                     <p class="text-xs text-[var(--muted-foreground)]">
                                         Hora: <span x-text="item.hora"></span>
                                     </p>
+
                                 </div>
                             </template>
 
@@ -223,27 +253,17 @@
                            style="color:var(--primary);">
                             Ver todas →
                         </a>
-
                     </div>
-
                 </div>
                 @endhasanyrole
-
-            </div>
-
-
-
-
+            </div> {{-- FIN DESKTOP --}}
 
             {{-- ========================================================
-                 🔔 + USER + HAMBURGER — MOBILE
+                 MOBILE NAV
             ======================================================== --}}
             <div class="flex items-center gap-4 md:hidden">
 
-
-{{-- ========================================================= --}}
-{{-- MENU MOBILE DESLIZANTE (OFFCANVAS) --}}
-{{-- ========================================================= --}}
+{{-- =========== OFFCANVAS MENU MOBILE =========== --}}
 <div 
     x-cloak
     x-show="open"
@@ -253,64 +273,69 @@
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="translate-x-0 opacity-100"
     x-transition:leave-end="translate-x-full opacity-0"
-    class="fixed inset-0 z-[9999] md:hidden"
->
+    class="fixed inset-0 z-[9999] md:hidden">
 
-    {{-- Fondo oscuro --}}
     <div @click="open=false" class="absolute inset-0 bg-black/40"></div>
 
-    {{-- Panel deslizante --}}
     <div class="absolute right-0 top-0 h-full w-72 shadow-xl p-6 space-y-4 overflow-y-auto offcanvas-scroll"
-        style="background-color:var(--card); border-left:1px solid var(--border);">
+         style="background-color:var(--card); border-left:1px solid var(--border);">
 
-
-
-        {{-- Cerrar --}}
         <div class="flex justify-end">
             <button @click="open=false" class="p-2 rounded hover:bg-[var(--muted)]">
                 ✕
             </button>
         </div>
 
-        {{-- SOLO SUPERUSUARIO --}}
         @hasrole('SUPERUSUARIO')
         <nav class="space-y-3">
 
+            {{-- Inicio --}}
             <a href="{{ route('dashboard.super') }}"
                class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
-               style="color:var(--foreground);">🏠 Dashboard</a>
+               style="color:var(--foreground);">🏠 Inicio</a>
 
+            {{-- Personal --}}
             <a href="{{ route('personalcontrol.index') }}"
                class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
                style="color:var(--foreground);">👮 Personal</a>
 
-            <a href="{{ route('controles.index') }}"
-               class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
-               style="color:var(--foreground);">🚓 Controles</a>
+            {{-- Control Policial --}}
+            <details class="group">
+                <summary class="px-2 py-2 rounded hover:bg-[var(--muted)] cursor-pointer"
+                         style="color:var(--foreground);">
+                    🚓 Control Policial
+                </summary>
 
-            <a href="{{ route('vehiculo.index') }}"
-               class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
-               style="color:var(--foreground);">🚗 Vehículos</a>
+                <div class="ml-4 mt-2 space-y-2">
+                    <a href="{{ route('controles.index') }}" class="block text-sm hover:underline">Ver Controles</a>
+                    <a href="{{ route('vehiculo.index') }}" class="block text-sm hover:underline">Vehículos</a>
+                    <a href="{{ route('conductores.index') }}" class="block text-sm hover:underline">Conductores</a>
+                    <a href="{{ route('acompaniante.index') }}" class="block text-sm hover:underline">Acompañantes</a>
+                    <a href="{{ route('novedades.index') }}" class="block text-sm hover:underline">Novedades</a>
+                </div>
+            </details>
 
-            <a href="{{ route('conductores.index') }}"
-               class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
-               style="color:var(--foreground);">👤 Conductores</a>
-
-            <a href="{{ route('acompaniante.index') }}"
-               class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
-               style="color:var(--foreground);">🧍 Acompañantes</a>
-
-            <a href="{{ route('novedades.index') }}"
-               class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
-               style="color:var(--foreground);">🚨 Novedades</a>
-
+            {{-- Productividad --}}
             <a href="{{ route('productividad.index') }}"
                class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
                style="color:var(--foreground);">📊 Productividad</a>
 
-            <a href="{{ route('cargos-policiales.index') }}"
-               class="block px-2 py-2 rounded hover:bg-[var(--muted)]"
-               style="color:var(--foreground);">🎖️ Cargos</a>
+            {{-- Configuración --}}
+            <details class="group">
+                <summary class="px-2 py-2 rounded hover:bg-[var(--muted)] cursor-pointer"
+                         style="color:var(--foreground);">
+                    ⚙️ Configuración
+                </summary>
+
+                <div class="ml-4 mt-2 space-y-2">
+                    <a href="{{ route('cargos-policiales.index') }}" class="block text-sm hover:underline">
+                        Cargos Policiales
+                    </a>
+                    <a href="{{ route('usuarios.index') }}" class="block text-sm hover:underline">
+                        Usuarios
+                    </a>
+                </div>
+            </details>
 
         </nav>
         @endhasrole
@@ -339,18 +364,12 @@
             @csrf
             <button type="submit"
                 class="w-full text-left px-2 py-2 rounded hover:bg-[var(--muted)]"
-                style="color:var(--foreground);">
-                🚪 Cerrar sesión
-            </button>
+                style="color:var(--foreground);">🚪 Cerrar sesión</button>
         </form>
 
     </div>
 
 </div>
-
-
-
-
 
 
                 {{-- CAMPANA MOBILE --}}
@@ -373,8 +392,6 @@
 
                     </button>
 
-
-                    {{-- LISTA MOBILE --}}
                     <div x-show="openMobile" x-transition x-cloak
                         class="absolute right-0 mt-2 w-64 rounded-lg shadow-lg border z-[9999]"
                         style="background: var(--card); border-color: var(--border);">
@@ -395,10 +412,14 @@
                                 <div class="p-4 border-b hover:bg-[var(--muted)]"
                                      style="border-color: var(--border);">
 
-                                    <p class="text-red-600 font-semibold text-sm">🚨 <span x-text="item.tipo"></span></p>
+                                    <p class="text-red-600 font-semibold text-sm">
+                                        🚨 <span x-text="item.tipo"></span>
+                                    </p>
+
                                     <p class="text-xs text-[var(--muted-foreground)]">
                                         Vehículo: <span x-text="item.dominio"></span>
                                     </p>
+
                                     <p class="text-xs text-[var(--muted-foreground)]">
                                         Hora: <span x-text="item.hora"></span>
                                     </p>
@@ -417,12 +438,9 @@
                 </div>
                 @endhasanyrole
 
-
-
-
                 {{-- HAMBURGER --}}
                 <button @click="open = !open"
-                        class="p-2 rounded-md hover:bg-[var(--muted)] focus:outline-none transition">
+                        class="p-2 rounded-md hover:bg-[var(--muted)] transition">
 
                     <svg class="h-6 w-6 text-[var(--foreground)]" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': !open }"
@@ -434,7 +452,6 @@
                     </svg>
 
                 </button>
-
             </div>
 
         </div>
@@ -442,12 +459,9 @@
 
 </nav>
 
-
-
-
-{{-- ===================================================== --}}
-{{-- JS: CAMPANA DESKTOP / MOBILE USANDO EL STORE GLOBAL --}}
-{{-- ===================================================== --}}
+{{-- =====================================================
+    JS: CAMPANA DESKTOP / MOBILE
+===================================================== --}}
 <script>
 function campanaDesktop() {
     return {

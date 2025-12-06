@@ -1,173 +1,193 @@
 <x-app-layout>
-    {{-- HEADER --}}
     <x-slot name="header">
-        <h2 class="text-xl font-bold" style="color: var(--foreground)">
-            Productividad General del Sistema
+        <h2 class="text-2xl font-semibold" style="color: var(--foreground);">
+            Panel de Productividad — Superusuario
         </h2>
     </x-slot>
 
-    <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-10">
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-        {{-- 📊 TARJETA DEL GRÁFICO PRINCIPAL --}}
-        <div class="card border shadow-lg rounded-xl p-6">
-            <h3 class="text-lg font-semibold mb-4" style="color: var(--foreground)">
-                Evolución Diaria de Registros
+        {{-- ======================================================
+            🔥 KPI GLOBAL
+        ======================================================= --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            <div class="rounded-xl p-4 shadow border"
+                style="background: var(--primary); color: var(--primary-foreground);">
+                <p class="text-xs opacity-80">Vehículos Registrados</p>
+                <p class="text-2xl font-extrabold">{{ $kpi['vehiculos'] }}</p>
+            </div>
+
+            <div class="rounded-xl p-4 shadow border"
+                style="background: var(--accent); color: var(--accent-foreground);">
+                <p class="text-xs opacity-80">Conductores Registrados</p>
+                <p class="text-2xl font-extrabold">{{ $kpi['conductores'] }}</p>
+            </div>
+
+            <div class="rounded-xl p-4 shadow border"
+                style="background: var(--secondary); color: var(--secondary-foreground);">
+                <p class="text-xs opacity-80">Acompañantes</p>
+                <p class="text-2xl font-extrabold">{{ $kpi['acompanantes'] }}</p>
+            </div>
+
+            <div class="rounded-xl p-4 shadow border"
+                style="background: var(--card); color: var(--foreground);">
+                <p class="text-xs opacity-80">Novedades Emitidas</p>
+                <p class="text-2xl font-extrabold">{{ $kpi['novedades'] }}</p>
+            </div>
+
+        </div>
+
+        {{-- ======================================================
+            📈 EVOLUCIÓN DIARIA
+        ======================================================= --}}
+        <div class="shadow rounded-xl border p-4">
+            <h3 class="text-base font-semibold mb-3" style="color: var(--foreground);">
+                Evolución General del Sistema
             </h3>
 
-            <div style="position: relative; height: 350px;">
-                <canvas id="productividadChart"></canvas>
+            <div class="h-52 md:h-64 lg:h-72">
+                <canvas id="evolucionChart"></canvas>
             </div>
         </div>
 
+        {{-- ======================================================
+            📉 RANKING OPERADORES
+        ======================================================= --}}
+        <div class="shadow rounded-xl border p-4">
+            <h3 class="text-base font-semibold mb-3" style="color: var(--foreground);">
+                Ranking de Productividad por Personal
+            </h3>
 
-        {{-- 📋 TABLA DE REGISTROS INDIVIDUALES --}}
-        <div class="card border shadow-lg rounded-xl overflow-hidden">
+            <div class="h-52 md:h-64 lg:h-72">
+                <canvas id="rankingChart"></canvas>
+            </div>
+        </div>
 
-            <div class="p-4 border-b" style="background: var(--muted)">
-                <h3 class="text-lg font-semibold" style="color: var(--muted-foreground)">
-                    Registros Individuales por Personal
+        {{-- ======================================================
+            🥧 TIPO DE REGISTROS
+        ======================================================= --}}
+        <div class="shadow rounded-xl border p-4">
+            <h3 class="text-base font-semibold mb-3" style="color: var(--foreground);">
+                Distribución Global de Registros
+            </h3>
+
+            <div class="flex justify-center">
+                <div class="h-40 w-40 md:h-48 md:w-48">
+                    <canvas id="tortaChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{-- ======================================================
+            🏆 TABLA RANKING
+        ======================================================= --}}
+        <div class="shadow rounded-xl border overflow-hidden">
+            <div class="p-3 border-b" style="background: var(--muted);">
+                <h3 class="text-base font-semibold" style="color: var(--muted-foreground);">
+                    Ranking General
                 </h3>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead style="background: var(--card)">
-                        <tr>
-                            @foreach(['ID','Personal','Fecha','Conductores','Vehículos','Acompañantes'] as $head)
-                                <th class="px-6 py-3 text-left font-bold uppercase tracking-wide"
-                                    style="color: var(--muted-foreground)">
-                                    {{ $head }}
-                                </th>
-                            @endforeach
-
-                            {{-- COLUMNA EXTRA SOLO SI ES ADMIN --}}
-                            @if(auth()->user()->role_id === 1)
-                                <th class="px-6 py-3 text-left font-bold uppercase tracking-wide"
-                                    style="color: var(--muted-foreground)">
-                                    Acción
-                                </th>
-                            @endif
+                <table class="min-w-full text-xs md:text-sm">
+                    <thead>
+                        <tr style="background: var(--card)">
+                            <th class="px-4 py-2 text-left">Personal</th>
+                            <th class="px-4 py-2 text-left">Cond.</th>
+                            <th class="px-4 py-2 text-left">Vehíc.</th>
+                            <th class="px-4 py-2 text-left">Acomp.</th>
+                            <th class="px-4 py-2 text-left">Nov.</th>
+                            <th class="px-4 py-2 text-left font-bold">Total</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        @forelse ($productividades as $p)
-                            <tr class="border-b" style="border-color: var(--border)">
-                                <td class="px-6 py-4">{{ $p->id }}</td>
-
-                                <td class="px-6 py-4 font-medium">
-                                    {{ $p->personalControl->nombre_apellido ?? '—' }}
-                                </td>
-
-                                <td class="px-6 py-4">
-                                    {{ \Carbon\Carbon::parse($p->fecha)->format('d/m/Y') }}
-                                </td>
-
-                                <td class="px-6 py-4">{{ $p->total_conductor }}</td>
-                                <td class="px-6 py-4">{{ $p->total_vehiculos }}</td>
-                                <td class="px-6 py-4">{{ $p->total_acompanante }}</td>
-
-                                {{-- BOTÓN VER SOLO PARA ADMIN --}}
-                                @if(auth()->user()->role_id === 1)
-                                    <td class="px-6 py-4">
-                                        <a href="{{ route('productividad.show', $p->id) }}"
-                                           class="px-3 py-1 rounded-lg text-xs font-semibold"
-                                           style="background: var(--accent); color: var(--accent-foreground)">
-                                            Ver
-                                        </a>
-                                    </td>
-                                @endif
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="py-5 text-center" style="color: var(--muted-foreground)">
-                                    No hay registros disponibles.
-                                </td>
-                            </tr>
-                        @endforelse
+                        @foreach($ranking as $r)
+                        <tr class="border-b" style="border-color: var(--border);">
+                            <td class="px-4 py-2 font-semibold">{{ $r->nombre }}</td>
+                            <td class="px-4 py-2">{{ $r->conductores }}</td>
+                            <td class="px-4 py-2">{{ $r->vehiculos }}</td>
+                            <td class="px-4 py-2">{{ $r->acompanantes }}</td>
+                            <td class="px-4 py-2">{{ $r->novedades }}</td>
+                            <td class="px-4 py-2 font-bold">{{ $r->total }}</td>
+                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            {{-- PAGINACIÓN --}}
-            <div class="p-4">
-                {{ $productividades->links() }}
-            </div>
+        {{-- ======================================================
+            🚨 ANOMALÍAS
+        ======================================================= --}}
+        <div class="shadow rounded-xl border p-4">
+            <h3 class="text-base font-semibold mb-3" style="color: var(--foreground);">
+                Anomalías Detectadas
+            </h3>
 
+            @if(empty($anomalias))
+                <p class="text-sm text-[var(--muted-foreground)]">No se detectaron anomalías.</p>
+            @else
+                <ul class="list-disc pl-6 space-y-1 text-xs md:text-sm">
+                    @foreach($anomalias as $a)
+                        <li>{{ $a }}</li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
 
     </div>
 
-    {{-- 📊 SCRIPT CHART JS --}}
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                const ctx = document.getElementById('productividadChart');
+    <script>
+        new Chart(document.getElementById('evolucionChart'), {
+            type: 'line',
+            data: {
+                labels: @json($evolucion['fechas']),
+                datasets: [{
+                    label: "Total por Día",
+                    data: @json($evolucion['totales']),
+                    borderColor: 'rgb(59,130,246)',
+                    backgroundColor: 'rgba(59,130,246,0.25)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
 
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: @json($fechas),
-                        datasets: [
-                            {
-                                label: 'Conductores',
-                                data: @json($conductores),
-                                borderColor: 'rgb(59,130,246)',
-                                backgroundColor: 'rgba(59,130,246,0.25)',
-                                tension: 0.3,
-                                borderWidth: 2,
-                                fill: true,
-                            },
-                            {
-                                label: 'Vehículos',
-                                data: @json($vehiculos),
-                                borderColor: 'rgb(234,179,8)',
-                                backgroundColor: 'rgba(234,179,8,0.25)',
-                                tension: 0.3,
-                                borderWidth: 2,
-                                fill: true,
-                            },
-                            {
-                                label: 'Acompañantes',
-                                data: @json($acompanantes),
-                                borderColor: 'rgb(16,185,129)',
-                                backgroundColor: 'rgba(16,185,129,0.25)',
-                                tension: 0.3,
-                                borderWidth: 2,
-                                fill: true,
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                ticks: {
-                                    color: getComputedStyle(document.documentElement).getPropertyValue('--foreground')
-                                }
-                            },
-                            y: {
-                                ticks: {
-                                    color: getComputedStyle(document.documentElement).getPropertyValue('--foreground')
-                                },
-                                beginAtZero: true
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: getComputedStyle(document.documentElement).getPropertyValue('--foreground')
-                                }
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
+        new Chart(document.getElementById('rankingChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($ranking->pluck('nombre')),
+                datasets: [{
+                    label: "Total",
+                    data: @json($ranking->pluck('total')),
+                    backgroundColor: 'rgba(234,88,12,0.7)',
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        new Chart(document.getElementById('tortaChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ["Conductores", "Vehículos", "Acompañantes", "Novedades"],
+                datasets: [{
+                    data: @json($torta),
+                    backgroundColor: [
+                        'rgba(59,130,246,0.7)',
+                        'rgba(234,179,8,0.7)',
+                        'rgba(16,185,129,0.7)',
+                        'rgba(239,68,68,0.7)'
+                    ]
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    </script>
     @endpush
-
-    @stack('scripts')
 </x-app-layout>

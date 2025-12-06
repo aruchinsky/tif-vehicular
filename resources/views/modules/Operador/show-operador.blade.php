@@ -14,7 +14,7 @@
             </svg>
 
             <div>
-                <h1 class="text-3xl font-extrabold" style="color: var(--foreground);">
+                <h1 class="text-3xl" style="color: var(--foreground);">
                     Operativo del {{ \Carbon\Carbon::parse($control->fecha)->format('d/m/Y') }}
                 </h1>
                 <p class="text-sm" style="color: var(--muted-foreground);">

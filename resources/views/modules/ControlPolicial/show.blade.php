@@ -10,13 +10,13 @@
         {{-- ========================================================= --}}
         <div class="flex items-center gap-3 mb-6">
 
-            {{-- Volver --}}
-            <a href="{{ route('dashboard') }}"
-               class="px-4 py-2 rounded-lg font-semibold text-sm shadow
-                      bg-[var(--primary)] text-[var(--primary-foreground)]
-                      hover:opacity-90 transition">
-                ← Volver al Panel
+            <a href="{{ url()->previous() }}"
+            class="px-4 py-2 rounded-lg font-semibold text-sm shadow
+                    bg-[var(--primary)] text-[var(--primary-foreground)]
+                    hover:opacity-90 transition">
+                ← Volver
             </a>
+
 
             {{-- Editar --}}
             <a href="{{ route('controles.edit', $control) }}"

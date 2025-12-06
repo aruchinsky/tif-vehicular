@@ -1,94 +1,86 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-bold" style="color: var(--foreground)">
-            Editar Novedad: {{ $novedad->tipo_novedad }}
+        <h2 class="text-2xl font-semibold" style="color: var(--foreground);">
+            Editar Novedad — {{ $novedad->tipo_novedad }}
         </h2>
     </x-slot>
 
-    <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto px-4 py-10 space-y-6">
 
-        {{-- Validación --}}
         @if ($errors->any())
-            <div class="mb-4 p-4 rounded-lg border border-red-400 bg-red-100 text-red-700">
-                <ul class="list-disc ml-4 space-y-1">
-                    @foreach ($errors->all() as $error)
-                        <li class="text-sm">{{ $error }}</li>
-                    @endforeach
-                </ul>
+            <div class="p-4 rounded-lg border bg-red-50 text-red-800 text-sm"
+                 style="border-color:#dc2626;">
+                Corrige los errores antes de continuar.
             </div>
         @endif
 
-        <div class="card shadow-lg rounded-xl border p-6">
+        <form method="POST"
+              action="{{ route('novedades.update', $novedad) }}"
+              class="shadow rounded-xl border p-6 space-y-6"
+              style="background: var(--card); border-color: var(--border);">
 
-            <form method="POST" action="{{ route('novedades.update', $novedad->id) }}" class="space-y-6">
-                @csrf
-                @method('PUT')
+            @csrf
+            @method('PUT')
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    {{-- Vehículo --}}
-                    <div>
-                        <label class="font-semibold" style="color: var(--foreground)">Vehículo asociado</label>
-                        <select name="vehiculo_id"
-                                class="mt-1 w-full px-4 py-3 rounded-lg border focus:ring-2"
-                                style="background: var(--card); border-color: var(--input); color: var(--foreground)">
-                            @foreach($vehiculos as $veh)
-                                <option value="{{ $veh->id }}"
-                                    {{ $novedad->vehiculo_id == $veh->id ? 'selected' : '' }}>
-                                    {{ $veh->marca_modelo }} — {{ $veh->dominio }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- Tipo --}}
-                    <div>
-                        <label class="font-semibold" style="color: var(--foreground)">Tipo de Novedad</label>
-                        <input type="text"
-                               name="tipo_novedad"
-                               value="{{ old('tipo_novedad', $novedad->tipo_novedad) }}"
-                               class="mt-1 w-full px-4 py-3 rounded-lg border"
-                               style="background: var(--card); border-color: var(--input); color: var(--foreground)">
-                    </div>
-
-                    {{-- Aplica --}}
-                    <div>
-                        <label class="font-semibold" style="color: var(--foreground)">Aplica</label>
-                        <input type="text"
-                               name="aplica"
-                               value="{{ old('aplica', $novedad->aplica) }}"
-                               class="mt-1 w-full px-4 py-3 rounded-lg border"
-                               style="background: var(--card); border-color: var(--input); color: var(--foreground)">
-                    </div>
-
-                    {{-- Observaciones --}}
-                    <div>
-                        <label class="font-semibold" style="color: var(--foreground)">Observaciones</label>
-                        <input type="text"
-                               name="observaciones"
-                               value="{{ old('observaciones', $novedad->observaciones) }}"
-                               class="mt-1 w-full px-4 py-3 rounded-lg border"
-                               style="background: var(--card); border-color: var(--input); color: var(--foreground)">
-                    </div>
-
+                {{-- Vehículo --}}
+                <div>
+                    <label class="text-sm font-semibold">Vehículo</label>
+                    <select name="vehiculo_id"
+                            class="w-full mt-1 rounded-lg border px-3 py-2 bg-[var(--input)]"
+                            style="border-color: var(--border);">
+                        @foreach ($vehiculos as $v)
+                            <option value="{{ $v->id }}"
+                                {{ $novedad->vehiculo_id == $v->id ? 'selected' : '' }}>
+                                {{ $v->marca_modelo }} — {{ $v->dominio }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
-                <div class="flex justify-end gap-4 pt-6">
-                    <a href="{{ route('novedades.index') }}"
-                       class="px-5 py-3 rounded-lg"
-                       style="background: var(--muted); color: var(--muted-foreground)">
-                        Cancelar
-                    </a>
-
-                    <button type="submit"
-                        class="px-5 py-3 rounded-lg font-semibold"
-                        style="background: var(--primary); color: var(--primary-foreground)">
-                        Actualizar
-                    </button>
+                {{-- Tipo --}}
+                <div>
+                    <label class="text-sm font-semibold">Tipo de Novedad</label>
+                    <input type="text" name="tipo_novedad"
+                           value="{{ $novedad->tipo_novedad }}"
+                           class="w-full mt-1 rounded-lg border px-3 py-2 bg-[var(--input)]"
+                           style="border-color: var(--border);">
                 </div>
 
-            </form>
+                {{-- Aplica --}}
+                <div>
+                    <label class="text-sm font-semibold">Aplica</label>
+                    <input type="text" name="aplica"
+                           value="{{ $novedad->aplica }}"
+                           class="w-full mt-1 rounded-lg border px-3 py-2 bg-[var(--input)]"
+                           style="border-color: var(--border);">
+                </div>
 
-        </div>
+                {{-- Observaciones --}}
+                <div>
+                    <label class="text-sm font-semibold">Observaciones</label>
+                    <input type="text" name="observaciones"
+                           value="{{ $novedad->observaciones }}"
+                           class="w-full mt-1 rounded-lg border px-3 py-2 bg-[var(--input)]"
+                           style="border-color: var(--border);">
+                </div>
+
+            </div>
+
+            <div class="flex justify-end gap-4">
+                <a href="{{ route('novedades.index') }}"
+                   class="px-4 py-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)]">
+                    Cancelar
+                </a>
+
+                <button class="px-5 py-2 rounded-lg font-semibold shadow"
+                        style="background: var(--primary); color: var(--primary-foreground);">
+                    Actualizar
+                </button>
+            </div>
+
+        </form>
+
     </div>
 </x-app-layout>

@@ -1,137 +1,201 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center gap-3">
-            {{-- Ícono Policial --}}
-            <svg xmlns="http://www.w3.org/2000/svg" 
-                 class="w-8 h-8 text-blue-600 dark:text-blue-400" 
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" 
-                    d="M3 5l9-3 9 3v6c0 5-3.5 9.74-9 11-5.5-1.26-9-6-9-11V5z"/>
-            </svg>
+{{-- resources/views/modules/Dashboard/operador-dashboard.blade.php --}}
 
-            <h2 class="text-3xl font-extrabold" style="color: var(--foreground);">
+<x-app-layout>
+
+    {{-- ========================================================= --}}
+    {{-- ======================= HEADER ========================== --}}
+    {{-- ========================================================= --}}
+    <x-slot name="header">
+        <div class="flex flex-col">
+            <h2 class="text-2xl font-semibold" style="color: var(--foreground);">
                 Panel del Operador
             </h2>
+            <p class="text-sm mt-1" style="color: var(--muted-foreground);">
+                Operativos policiales asignados a tu jornada
+            </p>
         </div>
-
-        <p class="text-sm mt-1" style="color: var(--muted-foreground)">
-            Controles policiales asignados a tu turno
-        </p>
     </x-slot>
+
 
     <div class="max-w-7xl mx-auto px-4 space-y-10">
 
-        {{-- SI NO TIENE OPERATIVOS --}}
+
+        {{-- ========================================================= --}}
+        {{-- ======= CASO: EL USUARIO NO ESTÁ VINCULADO A PERSONAL ==== --}}
+        {{-- ========================================================= --}}
         @if (!$personal)
-            <div class="p-10 rounded-2xl shadow text-center border border-blue-300"
-                 style="background: linear-gradient(135deg, #e0f2fe, #f8fafc);">
 
-                <svg xmlns="http://www.w3.org/2000/svg" 
-                     class="w-16 h-16 mx-auto text-blue-600 mb-4" 
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                          d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div class="p-10 rounded-xl shadow text-center border"
+                 style="background: var(--card); border-color: var(--border);">
 
-                <h3 class="text-2xl font-bold mb-2">No tenés ningún operativo asignado</h3>
+                <h3 class="text-xl font-semibold mb-2">No estás asignado como Operador</h3>
 
-                <p class="text-sm text-gray-600">
-                    Esperá indicaciones de tu Jefe de Unidad.
+                <p class="text-sm" style="color: var(--muted-foreground);">
+                    Consultá con tu Administrador o Jefe de Unidad.
                 </p>
+
             </div>
+
 
         @else
 
-            {{-- SALUDO PRINCIPAL --}}
-            <div class="rounded-xl p-6 shadow border border-blue-500/30"
-                 style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color:white;">
+        {{-- ========================================================= --}}
+        {{-- ==================== MÉTRICAS DEL DÍA ==================== --}}
+        {{-- ========================================================= --}}
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
 
-                <h3 class="text-3xl font-extrabold flex items-center gap-2">
-                    {{ $personal->nombre_apellido }}
-                </h3>
-
-                <p class="text-blue-100 mt-2">
-                    Estos son los operativos donde fuiste designado como <strong>OPERADOR</strong>.
-                </p>
+            {{-- Vehículos cargados --}}
+            <div class="p-4 shadow rounded-xl border-l-4"
+                style="background: var(--card); border-color:#3b82f6;">
+                <p class="text-xs" style="color: var(--muted-foreground);">Vehículos cargados</p>
+                <h2 class="text-2xl font-semibold mt-1">{{ $metricas['vehiculosHoy'] }}</h2>
             </div>
 
-            {{-- LISTADO MODERNO DE CONTROLES --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {{-- Conductores --}}
+            <div class="p-4 shadow rounded-xl border-l-4"
+                style="background: var(--card); border-color:#16a34a;">
+                <p class="text-xs" style="color: var(--muted-foreground);">Conductores</p>
+                <h2 class="text-2xl font-semibold mt-1">{{ $metricas['conductoresHoy'] }}</h2>
+            </div>
 
-                @forelse ($controles as $control)
-                    @php
-                        $actividad = $control->vehiculosControlados->count();
-                        $activo = $actividad > 0;
+            {{-- Acompañantes --}}
+            <div class="p-4 shadow rounded-xl border-l-4"
+                style="background: var(--card); border-color:#f59e0b;">
+                <p class="text-xs" style="color: var(--muted-foreground);">Acompañantes</p>
+                <h2 class="text-2xl font-semibold mt-1">{{ $metricas['acompanantesHoy'] }}</h2>
+            </div>
 
-                        $estadoLabel = $activo ? 'Con actividad' : 'Sin actividad';
-                        $estadoColor = $activo ? 'bg-green-600 text-white' : 'bg-gray-500 text-white';
+            {{-- Novedades --}}
+            <div class="p-4 shadow rounded-xl border-l-4"
+                style="background: var(--card); border-color:#dc2626;">
+                <p class="text-xs" style="color: var(--muted-foreground);">Novedades cargadas</p>
+                <h2 class="text-2xl font-semibold mt-1">{{ $metricas['novedadesHoy'] }}</h2>
+            </div>
 
-                        $inicio = \Carbon\Carbon::parse($control->hora_inicio)->format('H:i');
-                        $fin    = \Carbon\Carbon::parse($control->hora_fin)->format('H:i');
-                    @endphp
+            {{-- Próximo operativo --}}
+            <div class="p-4 shadow rounded-xl border-l-4"
+                style="background: var(--card); border-color:#0ea5e9;">
+                <p class="text-xs" style="color: var(--muted-foreground);">Próximo operativo</p>
+                <h2 class="text-lg font-semibold mt-1">
+                    {{ $metricas['tiempoRestante'] ?? '—' }}
+                </h2>
+            </div>
 
-                    <div class="shadow-xl rounded-2xl overflow-hidden border border-blue-200 dark:border-blue-900 transition hover:shadow-2xl"
-                         style="background-color: var(--card); color: var(--card-foreground);">
+        </div>
 
-                        {{-- HEADER CON FECHA --}}
-                        <div class="px-6 py-4 border-b"
-                             style="background: var(--primary); color: var(--primary-foreground);">
-                            <h4 class="text-xl font-bold flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" 
-                                    class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                {{ \Carbon\Carbon::parse($control->fecha)->format('d/m/Y') }}
-                            </h4>
-                        </div>
 
-                        {{-- CUERPO --}}
-                        <div class="px-6 py-5 space-y-2 text-sm">
 
-                            <p><strong class="font-semibold">Lugar:</strong> {{ $control->lugar }}</p>
-                            <p><strong class="font-semibold">Ruta:</strong> {{ $control->ruta ?? '—' }}</p>
-                            <p><strong class="font-semibold">Móvil:</strong> {{ $control->movil_asignado ?? '—' }}</p>
-                            <p><strong class="font-semibold">Horario:</strong> {{ $inicio }} – {{ $fin }}</p>
+        {{-- ========================================================= --}}
+        {{-- ================== PRÓXIMO OPERATIVO ===================== --}}
+        {{-- ========================================================= --}}
+        @if ($proximo)
 
-                            {{-- ESTADO --}}
-                            <div class="mt-2">
-                                <span class="px-3 py-1 text-xs font-bold rounded-full {{ $estadoColor }}">
-                                    {{ $estadoLabel }}
-                                </span>
-                            </div>
-                        </div>
+            @php
+                $inicio = \Carbon\Carbon::parse($proximo->hora_inicio)->format('H:i');
+                $fin    = \Carbon\Carbon::parse($proximo->hora_fin)->format('H:i');
+                $fecha  = \Carbon\Carbon::parse($proximo->fecha)->format('d/m/Y');
+            @endphp
 
-                        {{-- FOOTER --}}
-                        <div class="px-6 py-4 text-right border-t"
-                             style="border-color: var(--border);">
+            <div class="rounded-xl p-6 shadow border relative overflow-hidden"
+                 style="background: var(--primary); color: var(--primary-foreground);">
 
-                            <a href="{{ route('control.operador.show', $control->id) }}"
-                               class="px-5 py-2 rounded-lg font-semibold shadow-lg transition
-                                      bg-blue-600 text-white hover:bg-blue-700">
-                                Abrir Operativo →
-                            </a>
+                <div class="absolute right-6 top-6 opacity-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24" fill="none"
+                         stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 5l9-3 9 3v6c0 5-3.5 9.74-9 11-5.5-1.26-9-6-9-11V5z"/>
+                    </svg>
+                </div>
 
-                        </div>
-                    </div>
+                <h3 class="text-xl font-semibold mb-2">Próximo Operativo Asignado</h3>
 
-                @empty
+                <p class="text-lg font-semibold">{{ $proximo->lugar }}</p>
 
-                    <div class="p-8 rounded-xl shadow text-center"
-                         style="background-color: var(--card); color: var(--card-foreground);">
-                        <p class="text-lg font-semibold">Aún no tenés operativos asignados.</p>
-                    </div>
+                <p class="text-sm opacity-90">
+                    {{ $fecha }} — {{ $inicio }} a {{ $fin }}
+                </p>
 
-                @endforelse
-
+                <div class="mt-4">
+                    <a href="{{ route('control.operador.show', $proximo->id) }}"
+                       class="px-5 py-2 rounded-lg font-bold shadow bg-white text-black hover:bg-gray-200 transition">
+                        Ingresar al Operativo →
+                    </a>
+                </div>
             </div>
 
         @endif
 
+
+
+        {{-- ========================================================= --}}
+        {{-- =================== LISTA DE OPERATIVOS ================== --}}
+        {{-- ========================================================= --}}
+        <h3 class="text-xl font-semibold mt-6" style="color: var(--foreground);">
+            Todos tus operativos asignados
+        </h3>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            @forelse ($controles as $control)
+
+                @php
+                    $actividad = $control->vehiculosControlados->count();
+                    $estadoLabel = $actividad > 0 ? 'Con actividad' : 'Sin actividad';
+                    $estadoColor = $actividad > 0
+                        ? 'bg-green-600 text-white'
+                        : 'bg-gray-500 text-white';
+
+                    $inicio = \Carbon\Carbon::parse($control->hora_inicio)->format('H:i');
+                    $fin    = \Carbon\Carbon::parse($control->hora_fin)->format('H:i');
+                    $fecha  = \Carbon\Carbon::parse($control->fecha)->format('d/m/Y');
+                @endphp
+
+                <div class="shadow rounded-xl border transition hover:shadow-lg"
+                     style="background: var(--card); border-color: var(--border);">
+
+                    {{-- HEADER --}}
+                    <div class="px-6 py-4 border-b"
+                         style="background: var(--muted); border-color: var(--border);">
+                        <h4 class="font-semibold text-lg">{{ $fecha }}</h4>
+                    </div>
+
+                    {{-- BODY --}}
+                    <div class="px-6 py-4 space-y-2 text-sm">
+                        <p><strong>Lugar:</strong> {{ $control->lugar }}</p>
+                        <p><strong>Ruta:</strong> {{ $control->ruta ?? '—' }}</p>
+                        <p><strong>Móvil:</strong> {{ $control->movil_asignado ?? '—' }}</p>
+                        <p><strong>Horario:</strong> {{ $inicio }} — {{ $fin }}</p>
+
+                        <div class="mt-2">
+                            <span class="px-3 py-1 text-xs font-bold rounded-full {{ $estadoColor }}">
+                                {{ $estadoLabel }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- FOOTER --}}
+                    <div class="px-6 py-4 border-t text-right"
+                         style="border-color: var(--border);">
+                        <a href="{{ route('control.operador.show', $control->id) }}"
+                           class="px-4 py-2 rounded-lg font-semibold shadow bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition">
+                            Abrir Operativo →
+                        </a>
+                    </div>
+                </div>
+
+            @empty
+
+                <div class="p-8 rounded-xl shadow text-center"
+                     style="background: var(--card); color: var(--foreground);">
+                    <p class="text-lg font-semibold">No tenés operativos asignados.</p>
+                </div>
+
+            @endforelse
+
+        </div>
+
+        @endif {{-- cierre de $personal --}}
+
     </div>
-
-
-
-
 
 </x-app-layout>

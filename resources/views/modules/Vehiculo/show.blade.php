@@ -1,82 +1,61 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-bold" style="color: var(--foreground)">
-            Detalle del Vehículo
+        <h2 class="text-xl font-bold" style="color: var(--foreground);">
+            Vehículo — {{ $vehiculo->dominio }}
         </h2>
     </x-slot>
 
-    <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto py-10 px-4 space-y-8">
 
-        <div class="card shadow-lg border rounded-xl p-6 space-y-6">
+        <a href="{{ route('vehiculo.index') }}"
+            class="text-sm px-4 py-2 rounded bg-[var(--muted)] text-[var(--muted-foreground)] hover:opacity-80">
+            ← Volver
+        </a>
 
-            <h3 class="text-lg font-semibold" style="color: var(--foreground)">
-                Información General
-            </h3>
+        <div class="shadow rounded-xl p-6 border"
+             style="background: var(--card); border-color: var(--border);">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <h3 class="text-xl font-semibold mb-4">Información del Vehículo</h3>
 
-                <div>
-                    <p class="text-sm font-semibold" style="color: var(--muted-foreground)">ID</p>
-                    <p class="font-medium" style="color: var(--foreground)">{{ $vehiculo->id }}</p>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 
-                <div>
-                    <p class="text-sm font-semibold" style="color: var(--muted-foreground)">Conductor</p>
-                    <p class="font-medium" style="color: var(--foreground)">
-                        {{ $vehiculo->conductor->nombre_apellido ?? '—' }}
-                    </p>
-                </div>
+                <p><strong>Dominio:</strong> {{ $vehiculo->dominio }}</p>
+                <p><strong>Modelo:</strong> {{ $vehiculo->marca_modelo }}</p>
+                <p><strong>Color:</strong> {{ $vehiculo->color ?? '—' }}</p>
+                <p><strong>Fecha control:</strong> 
+                    {{ \Carbon\Carbon::parse($vehiculo->fecha_hora_control)->format('d/m/Y H:i') }}
+                </p>
 
-                <div>
-                    <p class="text-sm font-semibold" style="color: var(--muted-foreground)">Personal de Control</p>
-                    <p class="font-medium" style="color: var(--foreground)">
-                        {{ $vehiculo->personalControl->nombre_apellido ?? '—' }}
-                    </p>
-                </div>
+                <p><strong>Conductor:</strong> {{ $vehiculo->conductor->nombre_apellido }}</p>
 
-                <div>
-                    <p class="text-sm font-semibold" style="color: var(--muted-foreground)">Fecha y Hora</p>
-                    <p class="font-medium" style="color: var(--foreground)">
-                        {{ \Carbon\Carbon::parse($vehiculo->fecha_hora_control)->format('d/m/Y H:i') }}
-                    </p>
-                </div>
+                <p><strong>Operador:</strong>
+                    {{ $vehiculo->operador->nombre_apellido ?? '—' }}
+                </p>
 
-                <div>
-                    <p class="text-sm font-semibold" style="color: var(--muted-foreground)">Marca / Modelo</p>
-                    <p class="font-medium" style="color: var(--foreground)">{{ $vehiculo->marca_modelo }}</p>
-                </div>
-
-                <div>
-                    <p class="text-sm font-semibold" style="color: var(--muted-foreground)">Dominio</p>
-                    <p class="font-medium" style="color: var(--foreground)">{{ $vehiculo->dominio }}</p>
-                </div>
-
-                <div>
-                    <p class="text-sm font-semibold" style="color: var(--muted-foreground)">Color</p>
-                    <p class="font-medium" style="color: var(--foreground)">{{ $vehiculo->color ?? '—' }}</p>
-                </div>
+                <p><strong>Control policial:</strong>
+                    {{ $vehiculo->control->lugar ?? '—' }} ({{ $vehiculo->control->fecha }})
+                </p>
 
             </div>
-
-            <div class="flex justify-end gap-4">
-
-                <a href="{{ route('vehiculo.index') }}"
-                    class="px-4 py-2 rounded-lg"
-                    style="background: var(--muted); color: var(--muted-foreground)">
-                    Volver
-                </a>
-
-                @role('ADMINISTRADOR')
-                <a href="{{ route('vehiculo.edit', $vehiculo->id) }}"
-                    class="px-4 py-2 rounded-lg"
-                    style="background: var(--accent); color: var(--accent-foreground)">
-                    Editar
-                </a>
-                @endrole
-
-            </div>
-
         </div>
 
+        {{-- NOVEDADES --}}
+        <div class="shadow rounded-xl p-6 border"
+             style="background: var(--card); border-color: var(--border);">
+
+            <h3 class="text-xl font-semibold mb-4">Novedades Registradas</h3>
+
+            @forelse($vehiculo->novedades as $n)
+                <div class="border-b py-3" style="border-color: var(--border);">
+                    <p class="font-semibold">{{ $n->tipo_novedad }}</p>
+                    <p class="text-sm">{{ $n->observaciones }}</p>
+                </div>
+            @empty
+                <p class="text-sm" style="color: var(--muted-foreground);">
+                    No se registraron novedades.
+                </p>
+            @endforelse
+
+        </div>
     </div>
 </x-app-layout>

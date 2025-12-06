@@ -15,6 +15,7 @@ use App\Http\Controllers\NovedadController;
 use App\Http\Controllers\ProductividadController;
 use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\CargoPolicialController;
+use App\Http\Controllers\UserController; // módulo Usuarios
 
 // -----------------------------------------------------------------------------
 // LANDING
@@ -60,49 +61,41 @@ Route::middleware(['auth', 'role:OPERADOR|ADMINISTRADOR|SUPERUSUARIO'])
         Route::get('/mi-ruta', [ControlPolicialController::class, 'rutaAsignada'])
             ->name('ruta');
 
-        // Registrar Conductor
+        // Registrar Conductor (vista operador)
         Route::get('/conductores/create', [ConductorController::class, 'create'])
             ->name('conductores.create');
+
         // Registrar conductor desde el operador
         Route::post('/conductores/store-operador', [ConductorController::class, 'storeOperador'])
             ->name('conductores.store-operador');
 
-        // ==========================================================
-        // REGISTRO DE VEHÍCULO + CONDUCTOR DESDE OPERADOR (MODAL)
-        // ==========================================================
+        // Registrar vehículo desde operador (modal)
         Route::post('/vehiculo/store-operador', [VehiculoController::class, 'storeOperador'])
             ->name('vehiculo.store-operador');
 
-
-
-
-        // Registrar Acompañante
+        // Registrar Acompañante (operador)
         Route::get('/acompaniante/create', [AcompanianteController::class, 'create'])
             ->name('acompaniante.create');
         Route::post('/acompaniante', [AcompanianteController::class, 'store'])
             ->name('acompaniante.store');
 
-        // Registrar Vehículo
+        // Registrar Vehículo desde operador (form completo)
         Route::get('/vehiculo/create', [VehiculoController::class, 'create'])
             ->name('vehiculo.create');
         Route::post('/vehiculo', [VehiculoController::class, 'store'])
             ->name('vehiculo.store');
 
-        // Ver detalle de un control policial
+        // Detalle de control (vista Operador)
         Route::get('/operador/control/{control}', [OperadorDashboardController::class, 'show'])
             ->name('operador.show');
 
-        // Exportación PDF del operativo
+        // Exportar PDF de operativo
         Route::get('/exportar/pdf/{control}', [OperadorDashboardController::class, 'exportPdf'])
             ->name('export.pdf');
 
-        // ==========================================================
-        // REGISTRO DE NOVEDAD DESDE OPERADOR (MODAL)
-        // ==========================================================
+        // Registrar Novedad desde operador (modal)
         Route::post('/novedades/store-operador', [NovedadController::class, 'storeOperador'])
             ->name('novedades.store-operador');
-
-
     });
 
 // -----------------------------------------------------------------------------
@@ -111,19 +104,24 @@ Route::middleware(['auth', 'role:OPERADOR|ADMINISTRADOR|SUPERUSUARIO'])
 Route::middleware(['auth', 'role:ADMINISTRADOR|SUPERUSUARIO'])
     ->group(function () {
 
-        // CONTROLES POLICIALES (panel integral)
+        // CONTROLES POLICIALES
         Route::resource('controles', ControlPolicialController::class)
-            ->parameters([
-                'controles' => 'control'
-            ]);
+            ->parameters(['controles' => 'control']);
 
-        // Registrar personal vía AJAX (modal)
+        // ---------------------------------------------------------------------
+        // PERSONAL POLICIAL
+        // ---------------------------------------------------------------------
+
+        // ABM completo de Personal (solo Admin + Super)
+        Route::resource('personal', PersonalController::class)
+            ->except(['show']); // por ahora sin vista de detalle
+
+        // Registrar personal vía AJAX (modal dentro de Control)
         Route::post('/personal/store-ajax', [PersonalController::class, 'storeAjax'])
             ->name('personal.store-ajax');
 
-
-        // Alias menú antiguo
-        Route::get('/personalcontrol', fn () => redirect()->route('controles.index'))
+        // Alias histórico: antes apuntaba a controles, ahora al módulo Personal
+        Route::get('/personalcontrol', fn () => redirect()->route('personal.index'))
             ->name('personalcontrol.index');
 
         // ---------------------------------------------------------------------
@@ -173,7 +171,13 @@ Route::middleware(['auth', 'role:ADMINISTRADOR|SUPERUSUARIO'])
         // ---------------------------------------------------------------------
         // CARGOS POLICIALES
         // ---------------------------------------------------------------------
-        Route::resource('cargos-policiales', CargoPolicialController::class);
+        Route::resource('cargos-policiales', CargoPolicialController::class)
+            ->parameters(['cargos-policiales' => 'cargo']);
 
+
+        // ---------------------------------------------------------------------
+        // USUARIOS (solo SUPERUSUARIO)
+// ---------------------------------------------------------------------
+        Route::resource('usuarios', UserController::class)
+            ->middleware('role:SUPERUSUARIO');
     });
-

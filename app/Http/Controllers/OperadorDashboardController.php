@@ -13,25 +13,91 @@ class OperadorDashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Traemos el personal asociado al usuario operador
+        // Personal vinculado
         $personal = Personal::where('user_id', $user->id)->first();
 
         if (!$personal) {
             return view('modules.Dashboard.operador-dashboard', [
                 'controles' => [],
                 'personal' => null,
+                'proximo' => null,
+                'metricas' => [],
             ]);
         }
 
-        // Controles donde está asignado el operador
+        // Controles asignados ordenados por fecha ascendente
         $controles = ControlPolicial::whereHas('personalAsignado', function ($q) use ($personal) {
                 $q->where('personal_id', $personal->id);
             })
-            ->orderBy('fecha', 'desc')
+            ->orderBy('fecha', 'asc')
+            ->orderBy('hora_inicio', 'asc')
             ->get();
 
-        return view('modules.Dashboard.operador-dashboard', compact('controles', 'personal'));
+        // Próximo operativo
+        $proximo = $controles->first();
+
+        // ============================================
+        // MÉTRICAS DEL OPERADOR (HISTÓRICAS DE HOY)
+        // ============================================
+
+        $hoy = now()->toDateString();
+
+        // 1) Vehículos cargados hoy por este operador
+        $vehiculosHoy = \App\Models\Vehiculo::whereDate('fecha_hora_control', $hoy)
+            ->where('operador_id', $personal->id)
+            ->get();
+
+        // Cantidad total de vehículos
+        $totalVehiculosHoy = $vehiculosHoy->count();
+
+        // 2) Conductores de esos vehículos
+        $totalConductoresHoy = $vehiculosHoy
+            ->pluck('conductor')  // colección de conductores
+            ->filter()            // por si alguno es null
+            ->count();
+
+        // 3) Acompañantes de esos conductores
+        $totalAcompanantesHoy = $vehiculosHoy
+            ->flatMap(function ($vehiculo) {
+                return $vehiculo->conductor?->acompaniante ?? collect();
+            })
+            ->count();
+
+        // 4) Novedades asociadas a esos vehículos
+        $totalNovedadesHoy = $vehiculosHoy
+            ->flatMap->novedades
+            ->count();
+
+        // 5) Tiempo restante hasta el próximo operativo
+        $tiempoRestante = null;
+
+        if ($proximo) {
+            $fechaHora = \Carbon\Carbon::parse($proximo->fecha . ' ' . $proximo->hora_inicio);
+            $tiempoRestante = now()->diffForHumans($fechaHora, [
+                'parts' => 2,
+                'short' => false,
+                'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW
+            ]);
+        }
+
+        $metricas = [
+            'vehiculosHoy'     => $totalVehiculosHoy,
+            'conductoresHoy'   => $totalConductoresHoy,
+            'acompanantesHoy'  => $totalAcompanantesHoy,
+            'novedadesHoy'     => $totalNovedadesHoy,
+            'tiempoRestante'   => $tiempoRestante,
+        ];
+
+
+        return view('modules.Dashboard.operador-dashboard', compact(
+            'controles',
+            'personal',
+            'proximo',
+            'metricas'
+        ));
     }
+
+
 
     /**
      * Vista principal del operador dentro de un control.

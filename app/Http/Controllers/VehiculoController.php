@@ -15,12 +15,18 @@ class VehiculoController extends Controller
      */
     public function index()
     {
-        $vehiculos = Vehiculo::with(['conductor', 'control', 'operador.personal'])
-            ->orderBy('fecha_hora_control', 'desc')
-            ->get();
+        $vehiculos = Vehiculo::with([
+            'conductor',
+            'control',
+            'operador',          // policía que cargó el vehículo
+            'operador.usuario'   // usuario del sistema (si tiene)
+        ])
+        ->orderBy('fecha_hora_control', 'desc')
+        ->get();
 
         return view('modules.Vehiculo.index', compact('vehiculos'));
     }
+
 
     /**
      * Formulario crear (modo ADMIN)
@@ -61,19 +67,53 @@ class VehiculoController extends Controller
 
     public function show(Vehiculo $vehiculo)
     {
-        $vehiculo->load(['conductor', 'control', 'operador.personal', 'novedades']);
+        $vehiculo->load([
+                        'conductor',
+                        'control',
+                        'operador',
+                        'operador.usuario',
+                        'novedades'
+                    ]);
+
 
         return view('modules.Vehiculo.show', compact('vehiculo'));
     }
 
     public function edit(Vehiculo $vehiculo)
     {
-        $controles  = ControlPolicial::orderBy('fecha', 'desc')->get();
-        $operadores = ControlPersonal::with('personal', 'control')->get();
-        $conductores = Conductor::all();
+        $controles = ControlPolicial::orderBy('fecha', 'desc')->get();
 
-        return view('modules.Vehiculo.edit', compact('vehiculo', 'controles', 'operadores', 'conductores'));
+        // -------------------------------------------
+        // CONDUCTORES POR CONTROL (solo los que pertenecen a ese control)
+        // -------------------------------------------
+        $conductoresPorControl = Vehiculo::with('conductor')
+            ->get()
+            ->groupBy('control_id')
+            ->map(function ($items) {
+                return $items->pluck('conductor')->unique('id')->values();
+            });
+
+        // -------------------------------------------
+        // OPERADORES POR CONTROL (personal asignado)
+        // -------------------------------------------
+        $operadoresPorControl = ControlPersonal::with('personal')
+            ->get()
+            ->groupBy('control_id')
+            ->map(function ($items) {
+                return $items->map(function ($i) {
+                    return [
+                        'id' => $i->personal->id,
+                        'nombre_apellido' => $i->personal->nombre_apellido,
+                    ];
+                })->values();
+            });
+
+        return view('modules.Vehiculo.edit', compact(
+            'vehiculo', 'controles', 'conductoresPorControl', 'operadoresPorControl'
+        ));
     }
+
+
 
     public function update(Request $request, Vehiculo $vehiculo)
     {
