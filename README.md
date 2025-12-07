@@ -1,115 +1,173 @@
-# Trabajo-Integrador-Final
+# Sistema de Control Vehicular y Poblacional en Ruta  
+**Trabajo Integrador Final — Tecnicatura en Desarrollo de Software**
 
-**Comisión:** [2.1]
-**Integrantes:** [Liza Rodriguez]
-**Docente:** [Facundo Veron]
-**Fecha:** [24/11/2025]
-
-#  Descripción
-
-Este sistema fue desarrollado para digitalizar y optimizar los controles vehiculares y poblacionales en ruta realizados por la Policía Federal Argentina – División Formosa. Permite registrar conductores, vehículos, acompañantes, novedades e infracciones, así como gestionar operativos y generar reportes exportables en PDF y Excel.
+**Comisión:** 2.1  
+**Integrante:** Liza Rodríguez  
+**Docente:** Facundo Verón  
+**Fecha:** 24/11/2025  
 
 ---
 
-## Funcionalidades principales
+# 🚓 Descripción General
 
-- Registro de conductores, vehículos y acompañantes.
-- Gestión de operativos (fecha, lugar, personal asignado).
-- Registro de novedades e infracciones.
-- Control de acceso por roles (Administrador / Policía).
-- Exportación de reportes a PDF y Excel.
-- Pipeline CI/CD con pruebas automatizadas.
-- Auditoría básica y PoC de notificaciones por WhatsApp.
+Este sistema digitaliza y moderniza el registro de **controles vehiculares y poblacionales en ruta**, utilizado por el **Personal Policial**.  
+La plataforma reemplaza completamente las planillas manuales utilizadas en los operativos, permitiendo un flujo de trabajo más rápido, íntegro y trazable.
+
+El sistema fue rediseñado con una **arquitectura moderna**, **roles y permisos reales**, **notificaciones en tiempo real** para administradores, y una **experiencia mobile-first** pensada para el personal policial en campo.
 
 ---
 
-## Tecnologías utilizadas
+# 🌟 Funcionalidades Principales
 
-| Componente         | Tecnología / Herramienta         |
-|--------------------|----------------------------------|
-| Backend            | Laravel 12 (PHP 8.3)             |
-| Frontend           | Blade + Tailwind CSS             |
-| Autenticación      | Jetstream + Livewire             |
-| Base de datos      | MySQL (local) / SQLite (CI)      |
-| CI/CD              | GitHub Actions                   |
-| Control de versiones | Git + GitHub (Git Flow)        |
-| Gestión ágil       | Trello (Scrum adaptado)          |
+### 🛂 **Gestión de personas y vehículos**
+- Registro de **conductores**, **vehículos** y **acompañantes**.
+- Autocompletado inteligente basado en datos existentes.
+- Relación automática entre entidades dentro del operativo.
+
+### 🚨 **Controles policiales**
+- Creación de operativos (fecha, zona, grupo policial asignado).
+- Carga asistida para cada vehículo detenido.
+- Estructura por **turnos** y **grupo de 4 por turno**.
+
+### 📝 **Novedades y alertas**
+- Registro de novedades desde el Operador.
+- Notificaciones **en tiempo real** para Administradores/Superusuarios mediante:
+  - Laravel Echo
+  - Reverb (WebSockets)
+  - Toaster unificado
+  - Campana con contador y lista histórica
+
+### 👮‍♂️ **Gestión de personal policial**
+- Alta de personal
+- Gestión de **cargos policiales**
+- Asignación de personal a operativos
+- Control total para SUPERUSUARIO
+
+### 📊 **Productividad**
+- Productividad por turno
+- Productividad por agente
+- Conteos automáticos:
+  - Conductores
+  - Vehículos
+  - Acompañantes
+  - Novedades por tipo
+
+### ✔ **Roles y seguridad (Spatie)**
+- **SUPERUSUARIO**
+- **ADMINISTRADOR**
+- **OPERADOR**
+- Acceso dinámico al menú y módulos según el rol.
+
+### 📱 **Diseño mobile-first**
+- Versión responsiva optimizada para móviles.
+- Menú lateral deslizante moderno.
+- Controles simples y de alta legibilidad para trabajo en ruta.
+
+### 📄 **Reportes**
+- Exportación a PDF de cada operativo.
+- Descarga de listado general.
 
 ---
 
-## Instalación local
+# 🛠 Tecnologías Utilizadas
 
-1. Clonar el repositorio:
+| Componente           | Tecnología / Herramienta           |
+|----------------------|------------------------------------|
+| Backend              | Laravel 12 (PHP 8.3)               |
+| Frontend             | Blade + Alpine.js + Tailwind CSS   |
+| Autenticación        | Jetstream                          |
+| Roles & Permisos     | Spatie Laravel Permission           |
+| WebSockets           | Laravel Echo + Reverb               |
+| Base de datos        | MySQL / MariaDB                    |
+| Versionado           | Git + GitHub                       |
+| Despliegue local     | Artisan Serve / XAMPP / Laragon    |
+| CI/CD (opcional)     | GitHub Actions                     |
 
-## git clone https://github.com/Liza88-prog/Trabajo-Integrador-Final
-## cd Trabajo-Integrador-Final
+---
 
-2. 	Instalar dependencias:
-composer install
-npm install && npm run dev
+# 🔐 Cuentas por defecto (Seeder)
 
+### 👑 SUPERUSUARIO
+Email: super@demo.com  
+Contraseña: password123  
+Rol: SUPERUSUARIO
 
-3. 	Configurar entorno:
+### 🛡 ADMINISTRADOR
+Email: admin@demo.com  
+Contraseña: password123  
+Rol: ADMINISTRADOR
 
-cp .env.example .env
+### 👮 OPERADOR
+Email: operador@demo.com  
+Contraseña: password123  
+Rol: OPERADOR
+
+---
+
+# 🚀 Instalación Local
+
+### 1️⃣ Clonar el repositorio
+git clone https://github.com/Liza88-prog/Trabajo-Integrador-Final  
+cd Trabajo-Integrador-Final
+
+### 2️⃣ Instalar dependencias
+composer install  
+npm install  
+npm run dev
+
+### 3️⃣ Configurar entorno
+cp .env.example .env  
 php artisan key:generate
 
-4. 	Configurar base de datos .env 
+Editar conexión MySQL en .env
 
-5. 	Ejecutar migraciones y seeders:
-
+### 4️⃣ Migraciones + seeders
 php artisan migrate --seed
 
-6. 	Iniciar servidor:
+### 5️⃣ Iniciar servidor
+composer run dev 
+➡ http://localhost:8000/
 
-php artisan serve
+---
 
+# 🧩 Arquitectura del Sistema
 
-## Acceder desde el navegador
+app/ → Modelos, controladores, eventos  
+resources/views/ → Vistas Blade  
+routes/web.php → Rutas  
+public/js/app.js → Echo + Reverb  
+database/migrations → Tablas  
+database/seeders → Roles, usuarios y datos base  
+README.md → Documentación
 
-## Testing e integración continua
-• 	Las pruebas automatizadas se ejecutan con PHPUnit.
-• 	El pipeline CI/CD 
-• 	Se utiliza SQLite en memoria para pruebas en entorno CI.
-• 	Validación automática en cada push o pull request a  o .
+---
 
-## Estructura del repositorio
+# 🛡 Seguridad
 
-├── app/               # Lógica de negocio (Modelos, Controladores)
-├── resources/views/   # Vistas Blade
-├── routes/web.php     # Rutas del sistema
-├── tests/             # Pruebas automatizadas
-├── .env.example       # Variables de entorno de ejemplo
-├── .github/workflows/ci.yml  # Pipeline CI
-├── docs/              # Evidencias (capturas, métricas, tableros)
-└── README.md
+✔ Validación completa  
+✔ CSRF habilitado  
+✔ Roles Spatie  
+✔ Filtrado de inputs  
+✔ Restricción por vistas y rutas  
 
-## Seguridad y buenas prácticas
-• 	Validación de formularios y sanitización de entradas.
-• 	Protección CSRF en todos los formularios.
-• 	Manejo seguro de credenciales mediante .
-• 	Estilo de código validado con PHP_CodeSniffer (PSR-12).
-• 	Commits con convención 
+---
 
-## Mejoras futuras
-• 	Integración real con WhatsApp API.
-• 	Despliegue en contenedores Docker.
-• 	Reportes analíticos avanzados por agente y jornada.
-• 	Implementación de tests E2E y cobertura extendida.
+# 🔮 Mejoras Futuras
 
+- Reportes avanzados
+- Dashboards en tiempo real
+- Sincronización offline→online
+- Aplicación PWA
+- Infracciones digitalizadas
 
- ## Enlaces útiles
-[Repositorio GitHub](https://github.com/Liza88-prog/Trabajo-Integrador-Final/actions/workflows/ci.yml)
+---
 
-[pulls requests](https://github.com/Liza88-prog/Trabajo-Integrador-Final/pulls)
+# 🔗 Enlaces
 
-[test] (https://github.com/Liza88-prog/Trabajo-Integrador-Final/actions/runs/19278106984/job/55122726655)
+Repositorio: https://github.com/Liza88-prog/Trabajo-Integrador-Final  
+Pull Requests: https://github.com/Liza88-prog/Trabajo-Integrador-Final/pulls  
+Actions: https://github.com/Liza88-prog/Trabajo-Integrador-Final/actions  
 
+---
 
-
-
-## Lecciones aprendidas
-• 	Aplicación práctica de Scrum en un entorno individual.
-• 	Automatización de pruebas y validación continua con GitHub Actions.
-• 	Importancia de la trazabilidad, documentación y control de versiones en proyectos reales.
-
+# 🎓 Lecciones aprendidas

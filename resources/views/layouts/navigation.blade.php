@@ -17,12 +17,14 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
 
-            {{-- LOGO --}}
+                        {{-- LOGO --}}
             <div class="flex items-center space-x-8">
-                <a href="{{ route('dashboard') }}"
-                   class="text-xl font-bold"
-                   style="color: var(--primary);">
-                    Control Vehicular
+                <a href="{{ route('dashboard') }}" class="flex items-center text-xl font-bold"
+                style="color: var(--primary);">
+                    <img src="{{ asset('logo.png') }}" 
+                        alt="Logo" 
+                        class="h-12 w-auto object-contain">
+                        Sistema de Control Vehicular
                 </a>
             </div>
 
