@@ -37,6 +37,34 @@
         </tbody>
     </table>
 
+    <h2>Acompañantes Registrados</h2>
+
+    @if ($acompanantes->isEmpty())
+        <p>No se registraron acompañantes.</p>
+    @else
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>DNI</th>
+                    <th>Tipo</th>
+                    <th>Conductor Asociado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($acompanantes as $a)
+                    <tr>
+                        <td>{{ $a->nombre_apellido }}</td>
+                        <td>{{ $a->dni_acompaniante }}</td>
+                        <td>{{ $a->tipo_acompaniante ?? '—' }}</td>
+                        <td>{{ $a->conductor->nombre_apellido }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
+
     <h2>Vehículos Requisados</h2>
     <table>
         <thead>

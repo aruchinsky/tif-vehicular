@@ -83,4 +83,27 @@ class AcompanianteController extends Controller
             ->route('acompaniante.index')
             ->with('success', 'Acompañante eliminado correctamente.');
     }
+
+    // 🔹 Guardar desde OPERADOR (modal dentro del operativo)
+    public function storeOperador(Request $request)
+    {
+        // Validamos igual que en store, sin control_id porque no es columna
+        $data = $request->validate([
+            'conductor_id'      => 'required|integer|exists:conductor,id',
+            'dni_acompaniante'  => 'required|string|max:20|unique:acompaniante,dni_acompaniante',
+            'nombre_apellido'   => 'required|string|max:255',
+            'domicilio'         => 'nullable|string|max:255',
+            'tipo_acompaniante' => 'nullable|string|max:100',
+        ]);
+
+        Acompaniante::create($data);
+
+        // Usamos el control_id SOLO para saber a qué operativo volver
+        $controlId = $request->input('control_id');
+
+        return redirect()
+            ->route('control.operador.show', $controlId)
+            ->with('success', 'Acompañante registrado correctamente.');
+    }
+
 }

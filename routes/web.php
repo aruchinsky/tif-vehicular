@@ -96,6 +96,11 @@ Route::middleware(['auth', 'role:OPERADOR|ADMINISTRADOR|SUPERUSUARIO'])
         // Registrar Novedad desde operador (modal)
         Route::post('/novedades/store-operador', [NovedadController::class, 'storeOperador'])
             ->name('novedades.store-operador');
+
+        // Registrar Acompañante (OPERADOR, vía modal)
+        Route::post('/acompaniante/store-operador', [AcompanianteController::class, 'storeOperador'])
+            ->name('acompaniante.store-operador');
+
     });
 
 // -----------------------------------------------------------------------------

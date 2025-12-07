@@ -172,7 +172,7 @@ class OperadorDashboardController extends Controller
             abort(403, 'No estás autorizado para acceder a esta sección.');
         }
 
-        // MISMA VALIDACIÓN QUE EN EL SHOW
+        // VALIDACIÓN
         $operadorCargoId = CargoPolicial::where('nombre', 'Operador')->value('id');
 
         $control = ControlPolicial::with([
@@ -191,25 +191,25 @@ class OperadorDashboardController extends Controller
             abort(403, 'No estás asignado a este control policial.');
         }
 
-        // DATOS PARA EL PDF
-        $vehiculos = $control->vehiculosControlados;
-        $conductores = $vehiculos->pluck('conductor')->filter();
-        $novedades = $vehiculos->flatMap->novedades;
+        // DATOS
+        $vehiculos     = $control->vehiculosControlados;
+        $conductores   = $vehiculos->pluck('conductor')->unique('id')->filter();
+        $acompanantes  = $conductores->flatMap->acompaniante; // 👈 nuevo
+        $novedades     = $vehiculos->flatMap->novedades;
 
         // GENERAR PDF
         $pdf = Pdf::loadView('modules.Operador.pdf-operativo', [
-            'control'     => $control,
-            'conductores' => $conductores,
-            'vehiculos'   => $vehiculos,
-            'novedades'   => $novedades,
-            'personal'    => $personal,
+            'control'       => $control,
+            'personal'      => $personal,
+            'vehiculos'     => $vehiculos,
+            'conductores'   => $conductores,
+            'acompanantes'  => $acompanantes, // 👈 nuevo
+            'novedades'     => $novedades,
         ]);
 
-        //
-        // Nombre del archivo
-        //
         $filename = 'Operativo_' . $control->id . '_' . date('Y-m-d_H-i') . '.pdf';
 
         return $pdf->download($filename);
     }
+
 }

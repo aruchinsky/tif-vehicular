@@ -108,6 +108,27 @@
                 Registrar Novedad
             </button>
 
+            {{-- 🟧 Registrar Acompañante --}}
+            <button
+                type="button"
+                x-data
+                @click="$dispatch('open-modal', 'modal-registrar-acompaniante')"
+                class="p-5 rounded-xl shadow-lg text-center font-semibold transition hover:scale-105"
+                style="background:#ea580c; color:white;">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-9 h-9 mx-auto mb-2 opacity-80"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 4a4 4 0 100 8 4 4 0 000-8zm6 14v-1a4 4 0 00-4-4H10a4 4 0 00-4 4v1" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
+                        d="M19 11l2 2-2 2m-14-4l-2 2 2 2" />
+                </svg>
+
+                Registrar Acompañante
+            </button>
+
+
         </div>
 
 
@@ -141,6 +162,66 @@
             @endforelse
         </div>
 
+        {{-- ========================================================= --}}
+        {{-- 🟦 LISTADO DE CIVILES: CONDUCTORES + ACOMPAÑANTES --}}
+        {{-- ========================================================= --}}
+        <div class="shadow rounded-xl p-6 border"
+            style="background-color: var(--card); border-color: var(--border);">
+
+            <h2 class="text-xl font-bold mb-4" style="color: var(--foreground);">
+                Civiles Registrados
+            </h2>
+
+            @php
+                // Extraemos conductores únicos del operativo
+                $conductoresUnicos = $vehiculos->pluck('conductor')->unique('id');
+            @endphp
+
+            @forelse ($conductoresUnicos as $c)
+                <div class="border-b py-4" style="border-color: var(--border)">
+                    <p class="font-semibold text-lg">
+                        👤 {{ $c->nombre_apellido }}
+                    </p>
+
+                    <p class="text-sm" style="color: var(--muted-foreground)">
+                        DNI: <strong>{{ $c->dni_conductor }}</strong><br>
+                        Domicilio: <strong>{{ $c->domicilio ?? '—' }}</strong><br>
+                        Categoría: <strong>{{ $c->categoria_carnet ?? '—' }}</strong><br>
+                        Tipo: <strong>{{ $c->tipo_conductor ?? '—' }}</strong>
+                    </p>
+
+                    {{-- LISTA DE ACOMPAÑANTES --}}
+                    <div class="mt-3 ml-4">
+                        <p class="font-semibold text-sm mb-1">
+                            🧍‍♂️ Acompañantes:
+                        </p>
+
+                        @if ($c->acompaniante->isEmpty())
+                            <p class="text-sm" style="color: var(--muted-foreground)">
+                                No se registraron acompañantes.
+                            </p>
+                        @else
+                            <ul class="space-y-1">
+                                @foreach ($c->acompaniante as $a)
+                                    <li class="text-sm" style="color: var(--muted-foreground)">
+                                        • <strong>{{ $a->nombre_apellido }}</strong>
+                                        (DNI: {{ $a->dni_acompaniante }},
+                                        Tipo: {{ $a->tipo_acompaniante ?? '—' }})
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+
+                </div>
+
+            @empty
+                <p class="text-sm" style="color: var(--muted-foreground)">
+                    No se han registrado civiles aún.
+                </p>
+            @endforelse
+
+        </div>
 
 
         {{-- ========================================================= --}}
@@ -480,6 +561,114 @@
     </div>
 
 </x-modal-simple>
+
+{{-- ========================================================= --}}
+{{-- 🟧 MODAL REGISTRAR ACOMPAÑANTE (MODERNO Y COMPLETO) --}}
+{{-- ========================================================= --}}
+<x-modal-simple name="modal-registrar-acompaniante" maxWidth="lg">
+
+    <div class="p-6 space-y-6"
+         style="background-color: var(--card); color: var(--card-foreground);">
+
+        {{-- TÍTULO --}}
+        <h2 class="text-2xl font-bold flex items-center gap-2">
+            Registrar Acompañante
+        </h2>
+
+        <p class="text-sm" style="color: var(--muted-foreground)">
+            Seleccioná un conductor del operativo y cargá los datos del acompañante.
+        </p>
+
+        <form method="POST" action="{{ route('control.acompaniante.store-operador') }}">
+            @csrf
+
+            <input type="hidden" name="control_id" value="{{ $control->id }}">
+
+            {{-- ========================================================= --}}
+            {{-- SELECCIONAR CONDUCTOR DEL CONTROL --}}
+            {{-- ========================================================= --}}
+            <div>
+                <label class="font-semibold">Conductor *</label>
+
+                <select name="conductor_id" required
+                        class="w-full mt-1 p-2 rounded-lg border"
+                        style="background:var(--input); border-color:var(--border); color:var(--foreground)">
+                    <option value="">— Seleccioná conductor —</option>
+
+                    @foreach ($vehiculos as $v)
+                        <option value="{{ $v->conductor->id }}">
+                            {{ $v->conductor->nombre_apellido }}
+                            — DNI {{ $v->conductor->dni_conductor }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- ========================================================= --}}
+            {{-- CAMPOS DEL ACOMPAÑANTE --}}
+            {{-- ========================================================= --}}
+            <div class="mt-4">
+                <label class="font-semibold">DNI *</label>
+                <input type="text" name="dni_acompaniante" required
+                       class="w-full mt-1 p-2 rounded-lg border"
+                       style="background:var(--input); border-color:var(--border); color:var(--foreground)">
+            </div>
+
+            <div>
+                <label class="font-semibold">Nombre y Apellido *</label>
+                <input type="text" name="nombre_apellido" required
+                       class="w-full mt-1 p-2 rounded-lg border"
+                       style="background:var(--input); border-color:var(--border); color:var(--foreground)">
+            </div>
+
+            <div>
+                <label class="font-semibold">Domicilio</label>
+                <input type="text" name="domicilio"
+                       placeholder="Barrio — Calle — Nº"
+                       class="w-full mt-1 p-2 rounded-lg border"
+                       style="background:var(--input); border-color:var(--border); color:var(--foreground)">
+            </div>
+
+            <div>
+                <label class="font-semibold">Tipo de Acompañante</label>
+                <select name="tipo_acompaniante"
+                        class="w-full mt-1 p-2 rounded-lg border"
+                        style="background:var(--input); border-color:var(--border); color:var(--foreground)">
+                    <option value="">— Seleccionar —</option>
+                    <option>Pasajero</option>
+                    <option>Familiar</option>
+                    <option>Compañero de trabajo</option>
+                    <option>Menor a cargo</option>
+                    <option>Otro</option>
+                </select>
+            </div>
+
+            {{-- ========================================================= --}}
+            {{-- BOTONES --}}
+            {{-- ========================================================= --}}
+            <div class="flex justify-end gap-4 mt-6">
+
+                <button type="button"
+                        @click="$dispatch('close-modal', 'modal-registrar-acompaniante')"
+                        class="px-4 py-2 rounded-lg font-semibold"
+                        style="background: var(--muted); color: var(--foreground);">
+                    Cancelar
+                </button>
+
+                <button type="submit"
+                        class="px-5 py-2 rounded-lg font-semibold shadow-lg
+                               bg-orange-600 text-white hover:bg-orange-700">
+                    Registrar
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</x-modal-simple>
+
 
 
 {{-- SCRIPT ALPINE --}}
