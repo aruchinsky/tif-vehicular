@@ -3,16 +3,15 @@
         Crear Nuevo Control Policial
     </x-slot>
 
-            <div class="flex items-center gap-3 mb-6">
-
-                {{-- Volver --}}
-                <a href="{{ route('dashboard') }}"
-                class="px-4 py-2 rounded-lg font-semibold text-sm shadow
-                        bg-[var(--primary)] text-[var(--primary-foreground)]
-                        hover:opacity-90 transition">
-                    ← Volver al Panel
-                </a>
-            </div>
+    {{-- BOTÓN VOLVER --}}
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{{ route('dashboard') }}"
+           class="px-4 py-2 rounded-lg font-semibold text-sm shadow
+                  bg-[var(--primary)] text-[var(--primary-foreground)]
+                  hover:opacity-90 transition">
+            ← Volver al Panel
+        </a>
+    </div>
 
     <form action="{{ route('controles.store') }}" method="POST">
         @csrf
@@ -59,7 +58,11 @@
             </div>
 
             {{-- CARD: Personal asignado --}}
-            <div x-data="controlPersonal()" x-init="init()" class="card p-6 shadow rounded-xl">
+            <div
+                x-data="controlPersonal({{ $cargoOperadorId ?? 'null' }})"
+                x-init="init()"
+                class="card p-6 shadow rounded-xl"
+            >
 
                 <h3 class="text-xl font-bold mb-4">Personal Asignado</h3>
 
@@ -69,7 +72,6 @@
                     <div class="flex-1">
                         <label class="font-semibold">Seleccionar policía</label>
 
-                        {{-- SELECT DINÁMICO --}}
                         <select x-model="selected" class="w-full rounded">
                             <option value="">— Seleccionar —</option>
 
@@ -86,7 +88,7 @@
                         Agregar
                     </button>
 
-                    {{-- Abrir modal SIMPLE --}}
+                    {{-- BOTÓN NUEVO POLICÍA --}}
                     <button 
                         type="button"
                         class="px-4 py-2 rounded bg-[var(--secondary)] text-white"
@@ -103,29 +105,58 @@
 
                 {{-- LISTA DE PERSONAL ASIGNADO --}}
                 <template x-for="item in asignados" :key="item.id">
-                    <div class="flex items-center justify-between border-b py-3">
+                    <div class="flex items-center justify-between border-b py-3 gap-3">
 
                         <div>
                             <p class="font-semibold" x-text="item.nombre"></p>
                         </div>
 
-                        {{-- SELECT ROL --}}
-                        <select :name="'roles['+item.id+']'" class="rounded">
-                            @foreach ($cargos as $cargo)
-                                <option value="{{ $cargo->id }}">
-                                    {{ $cargo->nombre }}
-                                </option>
-                            @endforeach
-                        </select>
+                        {{-- SELECT ROL + AVISO --}}
+<div class="flex items-center gap-3">
 
-                        {{-- HIDDEN INPUT --}}
+    {{-- SELECT DEL ROL --}}
+    <select
+        class="rounded"
+        x-model="item.rol_id"
+        @change="onRolChange(item)"
+        :name="'roles['+item.id+']'"
+    >
+        @foreach ($cargos as $cargo)
+            <option value="{{ $cargo->id }}">{{ $cargo->nombre }}</option>
+        @endforeach
+    </select>
+
+    {{-- AVISO + BOTÓN → EN LA MISMA FILA --}}
+    <template x-if="item.necesita_usuario">
+        <div class="flex items-center gap-2 text-xs text-amber-600">
+
+            <span>⚠ Sin usuario</span>
+
+            <button type="button"
+                    class="px-2 py-1 rounded bg-[var(--secondary)] text-white text-xs"
+                    @click="
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'modal-crear-usuario' }));
+                        window.dispatchEvent(new CustomEvent('set-personal-id', { detail: item.id }));
+                    ">
+                Crear Usuario
+            </button>
+
+        </div>
+    </template>
+
+</div>
+
+
+                        {{-- HIDDEN INPUT PERSONAL --}}
                         <input type="hidden" :name="'personal[]'" :value="item.id">
 
+                        {{-- BOTÓN QUITAR --}}
                         <button type="button"
                                 @click="quitar(item.id)"
                                 class="text-red-500 font-bold">
                             ✖
                         </button>
+
                     </div>
                 </template>
 
@@ -146,12 +177,16 @@
         @include('modules.ControlPolicial.partials.modal-nuevo-policial')
     </x-modal-simple>
 
+    {{-- MODAL CREAR USUARIO --}}
+    <x-modal-simple name="modal-crear-usuario" maxWidth="lg">
+        @include('modules.ControlPolicial.partials.modal-crear-usuario')
+    </x-modal-simple>
+
     {{-- SCRIPT ALPINE --}}
     <script>
-        // Variables globales temporales para comunicación modal → create
         let ultimoPolicialCreado = null;
 
-        // Listener global del evento
+        // ESCUCHA GLOBAL DEL POLICÍA CREADO
         window.addEventListener('policial-creado', e => {
             ultimoPolicialCreado = {
                 id: e.detail.id,
@@ -159,40 +194,55 @@
             };
         });
 
-        function controlPersonal() {
+        // ESCUCHA GLOBAL DEL USUARIO CREADO
+        window.addEventListener('usuario-creado', e => {
+            let id = e.detail.personal_id;
+
+            // Actualizar en create
+            if (window.__controlPersonalInstance) {
+                window.__controlPersonalInstance.marcarUsuarioCreado(id);
+            }
+        });
+
+        function controlPersonal(cargoOperadorId) {
             return {
+                cargoOperadorId,
                 selected: "",
                 asignados: [],
 
-                listaPersonal: @json(
-                    $personal->map(fn($p) => [
-                        'id' => $p->id,
-                        'nombre' => $p->nombre_apellido
-                    ])
-                ),
+                // ⬇️ ACÁ CAMBIAMOS: JSON crudo + map en JS
+                listaPersonal: (function () {
+                    const raw = @json($personal);
+                    return raw.map(p => ({
+                        id: p.id,
+                        nombre: p.nombre_apellido,
+                        tiene_usuario: p.user_id !== null,
+                    }));
+                })(),
 
                 init() {
-                    // Cada 200ms chequeamos si hay uno nuevo agregado por el modal
-                    setInterval(() => {
+                    window.__controlPersonalInstance = this;
 
+                    // Cada 200ms chequeamos si hay uno nuevo del modal
+                    setInterval(() => {
                         if (ultimoPolicialCreado !== null) {
 
-                            // 1) Agregar a la lista de asignados
                             this.asignados.push({
                                 id: ultimoPolicialCreado.id,
-                                nombre: ultimoPolicialCreado.nombre
+                                nombre: ultimoPolicialCreado.nombre,
+                                rol_id: null,
+                                tiene_usuario: false,
+                                necesita_usuario: false,
                             });
 
-                            // 2) Agregar al select
                             this.listaPersonal.push({
                                 id: ultimoPolicialCreado.id,
-                                nombre: ultimoPolicialCreado.nombre
+                                nombre: ultimoPolicialCreado.nombre,
+                                tiene_usuario: false,
                             });
 
-                            // Borrar buffer
                             ultimoPolicialCreado = null;
                         }
-
                     }, 200);
                 },
 
@@ -203,11 +253,14 @@
                         return;
                     }
 
-                    let item = this.listaPersonal.find(p => p.id == this.selected);
+                    let p = this.listaPersonal.find(x => x.id == this.selected);
 
                     this.asignados.push({
-                        id: item.id,
-                        nombre: item.nombre
+                        id: p.id,
+                        nombre: p.nombre,
+                        rol_id: null,
+                        tiene_usuario: p.tiene_usuario,
+                        necesita_usuario: false,
                     });
 
                     this.selected = "";
@@ -215,10 +268,38 @@
 
                 quitar(id) {
                     this.asignados = this.asignados.filter(x => x.id != id);
+                },
+
+                onRolChange(item) {
+                    if (!this.cargoOperadorId) return;
+
+                    if (Number(item.rol_id) === Number(this.cargoOperadorId)) {
+
+                        let persona = this.listaPersonal.find(x => x.id == item.id);
+                        let tieneUsuario = persona ? persona.tiene_usuario : false;
+
+                        item.tiene_usuario = tieneUsuario;
+                        item.necesita_usuario = !tieneUsuario;
+
+                    } else {
+                        item.necesita_usuario = false;
+                    }
+                },
+
+                marcarUsuarioCreado(id) {
+                    // Actualizar lista principal
+                    let p = this.listaPersonal.find(x => x.id == id);
+                    if (p) p.tiene_usuario = true;
+
+                    // Actualizar asignados
+                    let a = this.asignados.find(x => x.id == id);
+                    if (a) {
+                        a.tiene_usuario = true;
+                        a.necesita_usuario = false;
+                    }
                 }
             }
         }
     </script>
-
 
 </x-app-layout>

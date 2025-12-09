@@ -35,10 +35,13 @@ class ControlPolicialController extends Controller
             ->orderBy('nombre_apellido')
             ->get();
 
-        // Cargos operativos (chofer, escopetero, operador, etc.)
-        $cargos = \App\Models\CargoPolicial::orderBy('nombre')->get();
+        // Cargos operativos
+        $cargos = CargoPolicial::orderBy('nombre')->get();
 
-        return view('modules.ControlPolicial.create', compact('personal', 'cargos'));
+        // ID del cargo OPERADOR
+        $cargoOperadorId = CargoPolicial::where('nombre', 'OPERADOR')->value('id');
+
+        return view('modules.ControlPolicial.create', compact('personal', 'cargos', 'cargoOperadorId'));
     }
 
     public function store(Request $request)

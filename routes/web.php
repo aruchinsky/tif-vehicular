@@ -16,6 +16,8 @@ use App\Http\Controllers\ProductividadController;
 use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\CargoPolicialController;
 use App\Http\Controllers\UserController; // módulo Usuarios
+use App\Http\Controllers\PersonalUsuarioController;
+
 
 // -----------------------------------------------------------------------------
 // LANDING
@@ -113,6 +115,11 @@ Route::middleware(['auth', 'role:ADMINISTRADOR|SUPERUSUARIO'])
         Route::resource('controles', ControlPolicialController::class)
             ->parameters(['controles' => 'control']);
 
+        // Registrar usuario para personal policial (modal dentro de Control)
+        Route::post('/personal/crear-usuario', [PersonalUsuarioController::class, 'store'])
+            ->name('personal.storeUsuario');
+
+
         // ---------------------------------------------------------------------
         // PERSONAL POLICIAL
         // ---------------------------------------------------------------------
@@ -182,7 +189,7 @@ Route::middleware(['auth', 'role:ADMINISTRADOR|SUPERUSUARIO'])
 
         // ---------------------------------------------------------------------
         // USUARIOS (solo SUPERUSUARIO)
-// ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------
         Route::resource('usuarios', UserController::class)
             ->middleware('role:SUPERUSUARIO');
     });
