@@ -13,6 +13,7 @@
         </a>
     </div>
 
+    {{-- ERRORES --}}
     @if ($errors->any())
         <div class="mb-4 p-4 rounded-lg bg-red-100 text-red-700 border border-red-300">
             <p class="font-bold mb-2">Errores:</p>
@@ -39,19 +40,19 @@
                     <div>
                         <label class="font-semibold">Fecha</label>
                         <input type="date"
-                               name="fecha"
-                               class="w-full rounded"
-                               value="{{ old('fecha', $control->fecha) }}"
-                               required>
+                            name="fecha"
+                            class="w-full rounded"
+                            value="{{ old('fecha', $control->fecha) }}"
+                            required>
                     </div>
 
                     <div>
                         <label class="font-semibold">Lugar</label>
                         <input type="text"
-                               name="lugar"
-                               class="w-full rounded"
-                               value="{{ old('lugar', $control->lugar) }}"
-                               required>
+                            name="lugar"
+                            class="w-full rounded"
+                            value="{{ old('lugar', $control->lugar) }}"
+                            required>
                     </div>
 
                     <div>
@@ -61,7 +62,6 @@
                             class="w-full rounded"
                             value="{{ old('hora_inicio', \Carbon\Carbon::parse($control->hora_inicio)->format('H:i')) }}"
                             required>
-
                     </div>
 
                     <div>
@@ -76,17 +76,17 @@
                     <div>
                         <label class="font-semibold">Ruta</label>
                         <input type="text"
-                               name="ruta"
-                               class="w-full rounded"
-                               value="{{ old('ruta', $control->ruta) }}">
+                            name="ruta"
+                            class="w-full rounded"
+                            value="{{ old('ruta', $control->ruta) }}">
                     </div>
 
                     <div>
                         <label class="font-semibold">Móvil asignado</label>
                         <input type="text"
-                               name="movil_asignado"
-                               class="w-full rounded"
-                               value="{{ old('movil_asignado', $control->movil_asignado) }}">
+                            name="movil_asignado"
+                            class="w-full rounded"
+                            value="{{ old('movil_asignado', $control->movil_asignado) }}">
                     </div>
 
                 </div>
@@ -95,6 +95,7 @@
             {{-- CARD: Personal asignado --}}
             <div
                 x-data="controlPersonalEdit(
+                    {{ $cargoOperadorId }},
                     JSON.parse($el.getAttribute('data-asignados')),
                     JSON.parse($el.getAttribute('data-listapersonal'))
                 )"
@@ -106,7 +107,7 @@
 
                 <h3 class="text-xl font-bold mb-4">Personal Asignado</h3>
 
-                {{-- SELECCIONAR POLICÍA --}}
+                {{-- SELECCIONAR --}}
                 <div class="flex gap-4 items-end mb-6">
 
                     <div class="flex-1">
@@ -121,45 +122,63 @@
                         </select>
                     </div>
 
-                    {{-- BOTÓN AGREGAR --}}
                     <button type="button"
-                            @click="agregar()"
-                            class="px-4 py-2 bg-[var(--primary)] text-white rounded shadow">
+                        @click="agregar()"
+                        class="px-4 py-2 bg-[var(--primary)] text-white rounded shadow">
                         Agregar
                     </button>
 
-                    {{-- Abrir modal --}}
                     <button type="button"
-                            class="px-4 py-2 rounded bg-[var(--secondary)] text-white"
-                            @click="
-                                window.dispatchEvent(
-                                    new CustomEvent('open-modal', { detail: 'modal-nuevo-policial' })
-                                )
-                            ">
+                        class="px-4 py-2 rounded bg-[var(--secondary)] text-white"
+                        @click="
+                            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'modal-nuevo-policial' }))
+                        ">
                         + Nuevo Policía
                     </button>
 
                 </div>
 
-                {{-- LISTA DE PERSONAL ASIGNADO --}}
+                {{-- LISTA --}}
                 <template x-for="item in asignados" :key="item.id">
+
                     <div class="flex items-center justify-between border-b py-3 gap-3">
 
                         <div class="flex-1">
                             <p class="font-semibold" x-text="item.nombre"></p>
                         </div>
 
-                        {{-- SELECT ROL --}}
-                        <div>
-                            <select class="rounded" x-model="item.rol_id">
+                        {{-- SELECT ROL + AVISO --}}
+                        <div class="flex items-center gap-3">
+
+                            <select class="rounded"
+                                x-model="item.rol_id"
+                                @change="onRolChange(item)"
+                                :name="'roles['+item.id+']'">
+
                                 @foreach ($cargos as $cargo)
                                     <option value="{{ $cargo->id }}">{{ $cargo->nombre }}</option>
                                 @endforeach
+
                             </select>
 
-                            <input type="hidden"
-                                   :name="'roles['+item.id+']'"
-                                   :value="item.rol_id">
+                            {{-- AVISO SIN USUARIO --}}
+                            <template x-if="item.necesita_usuario">
+                                <div class="flex items-center gap-2 text-xs text-amber-600">
+
+                                    <span>⚠ Sin usuario</span>
+
+                                    <button type="button"
+                                        class="px-2 py-1 rounded bg-[var(--secondary)] text-white text-xs"
+                                        @click="
+                                            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'modal-crear-usuario' }));
+                                            window.dispatchEvent(new CustomEvent('set-personal-id', { detail: item.id }));
+                                        ">
+                                        Crear Usuario
+                                    </button>
+
+                                </div>
+                            </template>
+
                         </div>
 
                         <input type="hidden" :name="'personal[]'" :value="item.id">
@@ -171,6 +190,7 @@
                         </button>
 
                     </div>
+
                 </template>
 
             </div>
@@ -190,69 +210,119 @@
         @include('modules.ControlPolicial.partials.modal-nuevo-policial')
     </x-modal-simple>
 
+    {{-- MODAL CREAR USUARIO --}}
+    <x-modal-simple name="modal-crear-usuario" maxWidth="lg">
+        @include('modules.ControlPolicial.partials.modal-crear-usuario')
+    </x-modal-simple>
 
     {{-- SCRIPT ALPINE --}}
-<script>
-    let ultimoPolicialCreado = null;
+    <script>
+        let ultimoPolicialCreado = null;
 
-    window.addEventListener('policial-creado', e => {
-        ultimoPolicialCreado = {
-            id: e.detail.id,
-            nombre: e.detail.nombre
-        };
-    });
+        window.addEventListener('policial-creado', e => {
+            ultimoPolicialCreado = {
+                id: e.detail.id,
+                nombre: e.detail.nombre
+            };
+        });
 
-    const defaultRolId = {{ $cargos->first()?->id ?? 'null' }};
+        window.addEventListener('usuario-creado', e => {
+            if (window.__editInstance) {
+                window.__editInstance.marcarUsuarioCreado(e.detail.personal_id);
+            }
+        });
 
-    function controlPersonalEdit(asignadosInit, listaInit) {
-        return {
-            selected: "",
-            asignados: asignadosInit,
-            listaPersonal: listaInit,
+        function controlPersonalEdit(cargoOperadorId, asignadosInit, listaInit) {
+            return {
+                cargoOperadorId,
+                selected: "",
+                asignados: asignadosInit,
+                listaPersonal: listaInit,
 
-            init() {
-                setInterval(() => {
-                    if (ultimoPolicialCreado !== null) {
+                init() {
+                    window.__editInstance = this;
 
-                        this.asignados.push({
-                            id: ultimoPolicialCreado.id,
-                            nombre: ultimoPolicialCreado.nombre,
-                            rol_id: defaultRolId,
-                        });
+                    // Normalizar asignados para incluir flags de usuario
+                    this.asignados = this.asignados.map(a => {
+                        let persona = this.listaPersonal.find(p => p.id == a.id);
+                        return {
+                            ...a,
+                            tiene_usuario: persona ? persona.tiene_usuario : false,
+                            necesita_usuario: Number(a.rol_id) === Number(this.cargoOperadorId) &&
+                                              !(persona ? persona.tiene_usuario : false)
+                        };
+                    });
 
-                        this.listaPersonal.push({
-                            id: ultimoPolicialCreado.id,
-                            nombre: ultimoPolicialCreado.nombre
-                        });
+                    // Detectar nuevos policías creados desde el modal
+                    setInterval(() => {
+                        if (ultimoPolicialCreado !== null) {
 
-                        ultimoPolicialCreado = null;
+                            this.asignados.push({
+                                id: ultimoPolicialCreado.id,
+                                nombre: ultimoPolicialCreado.nombre,
+                                rol_id: null,
+                                tiene_usuario: false,
+                                necesita_usuario: false,
+                            });
+
+                            this.listaPersonal.push({
+                                id: ultimoPolicialCreado.id,
+                                nombre: ultimoPolicialCreado.nombre,
+                                tiene_usuario: false,
+                            });
+
+                            ultimoPolicialCreado = null;
+                        }
+                    }, 200);
+                },
+
+                agregar() {
+                    if (!this.selected) return;
+
+                    if (this.asignados.some(a => a.id == this.selected)) return;
+
+                    let p = this.listaPersonal.find(x => x.id == this.selected);
+
+                    this.asignados.push({
+                        id: p.id,
+                        nombre: p.nombre,
+                        rol_id: null,
+                        tiene_usuario: p.tiene_usuario,
+                        necesita_usuario: false,
+                    });
+
+                    this.selected = "";
+                },
+
+                quitar(id) {
+                    this.asignados = this.asignados.filter(x => x.id != id);
+                },
+
+                onRolChange(item) {
+                    if (!this.cargoOperadorId) return;
+
+                    let persona = this.listaPersonal.find(p => p.id == item.id);
+                    let tieneUsuario = persona ? persona.tiene_usuario : false;
+
+                    if (Number(item.rol_id) === Number(this.cargoOperadorId)) {
+                        item.necesita_usuario = !tieneUsuario;
+                    } else {
+                        item.necesita_usuario = false;
                     }
-                }, 200);
-            },
+                },
 
-            agregar() {
-                if (!this.selected) return;
+                marcarUsuarioCreado(id) {
+                    let persona = this.listaPersonal.find(p => p.id == id);
+                    if (persona) persona.tiene_usuario = true;
 
-                if (this.asignados.some(a => a.id == this.selected)) {
-                    return;
+                    let item = this.asignados.find(a => a.id == id);
+                    if (item) {
+                        item.tiene_usuario = true;
+                        item.necesita_usuario = false;
+                    }
                 }
-
-                let p = this.listaPersonal.find(x => x.id == this.selected);
-
-                this.asignados.push({
-                    id: p.id,
-                    nombre: p.nombre,
-                    rol_id: defaultRolId,
-                });
-
-                this.selected = "";
-            },
-
-            quitar(id) {
-                this.asignados = this.asignados.filter(x => x.id != id);
             }
         }
-    }
-</script>
+    </script>
 
 </x-app-layout>

@@ -181,7 +181,10 @@ class ControlPolicialController extends Controller
         $personal = Personal::orderBy('nombre_apellido')->get();
         $cargos = CargoPolicial::orderBy('nombre')->get();
 
-        // Preparamos datos para Alpine (evitamos fn() => [...] dentro del Blade)
+        // ID del cargo OPERADOR (necesario para validación en Alpine)
+        $cargoOperadorId = CargoPolicial::where('nombre', 'OPERADOR')->value('id');
+
+        // Preparamos datos para Alpine
         $asignados = $control->personalAsignado->map(function ($cp) {
             return [
                 'id'     => $cp->personal_id,
@@ -194,6 +197,7 @@ class ControlPolicialController extends Controller
             return [
                 'id'     => $p->id,
                 'nombre' => $p->nombre_apellido,
+                'tiene_usuario' => $p->user_id !== null, // necesario también aquí
             ];
         });
 
@@ -201,9 +205,11 @@ class ControlPolicialController extends Controller
             'control',
             'cargos',
             'asignados',
-            'listaPersonal'
+            'listaPersonal',
+            'cargoOperadorId' // ← YA ESTÁ
         ));
     }
+
 
 
     public function update(Request $request, ControlPolicial $control)
