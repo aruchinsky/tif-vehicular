@@ -512,6 +512,10 @@
                     <option>Estado del Vehículo</option>
                     <option>Situación Judicial</option>
                     <option>Actitud Sospechosa</option>
+                    <option value="droga">Droga</option>
+                    <option value="contrabando">Contrabando</option>
+                    <option value="pedido de captura">Pedido de Captura</option>
+                    <option value="paradero">Paradero</option>
                     <option>Otro</option>
                 </select>
             </div>

@@ -147,7 +147,7 @@
                         </p>
 
                         <p class="text-sm" style="color: var(--muted-foreground)">
-                            Cargo: <strong>{{ $asig->personal->cargo->nombre ?? '—' }}</strong><br>
+                            Rol en el control: <strong>{{ $asig->rolOperativo->nombre ?? '—' }}</strong><br>
                             Usuario del sistema:
                             <strong>{{ $asig->personal->usuario->name ?? 'No asignado' }}</strong><br>
                             Legajo: <strong>{{ $asig->personal->legajo }}</strong><br>
